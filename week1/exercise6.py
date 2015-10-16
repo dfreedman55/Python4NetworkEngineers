@@ -12,8 +12,7 @@ import yaml
 import json
 
 with open('output-filename.json', 'w') as f:
- json.dump(a, f)
+    json.dump(a, f)
 
 with open('output-filename.yaml', 'w') as f:
- yaml.dump(a, f, default_flow_style=False)
-
+    yaml.dump(a, f, default_flow_style=False)

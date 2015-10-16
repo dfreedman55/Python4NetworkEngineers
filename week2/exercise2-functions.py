@@ -3,8 +3,10 @@
 import telnetlib
 import time
 
+
 def connect(ipadd, TELNET_PORT, TELNET_TIMEOUT):
 	return telnetlib.Telnet(ipadd, TELNET_PORT, TELNET_TIMEOUT)
+
 
 def login(connection, uname, pword):
 	output = connection.read_until('sername:', TELNET_TIMEOUT)
@@ -18,12 +20,14 @@ def login(connection, uname, pword):
 	output = connection.read_very_eager()
 	print output
 
+
 def send_command(connection, cmd):
 	cmd = cmd.strip() + '\n'
 	connection.write(cmd)
 	time.sleep(1)
 	output = connection.read_very_eager()
 	print output
+
 
 def main():
 	connection = connect(ipadd, TELNET_PORT, TELNET_TIMEOUT)
