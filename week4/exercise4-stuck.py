@@ -10,7 +10,7 @@ sshpt = 8022
 prompt = 'pynet-rtr2#'
 
 connection = pexpect.spawn('ssh -l {} {} -p {}'.format(uname, ipadd, sshpt))
-#connection.logfile = sys.stdout
+# connection.logfile = sys.stdout
 connection.timeout = 3
 
 connection.expect('assword:')
@@ -24,7 +24,8 @@ connection.sendline('show run | in logging')
 connection.expect(prompt)
 print connection.before
 connection.sendline('config t')
-connection.expect(prompt.strip('#') + '(config)#')	# update prompt to include -config#)
+connection.expect(prompt.strip('#') + '(config)#')
+# update prompt to include -config#)
 print connection.before
 connection.sendline('logging buffered 32768')
 connection.sendline('end')
