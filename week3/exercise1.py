@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-### IMPORT REQUIRED MODULES
+# IMPORT REQUIRED MODULES
 
 import pysnmp
 import snmp_helper
@@ -10,7 +10,7 @@ import yaml
 import json
 import time
 
-### SNMP INPUTS ###
+# SNMP INPUTS ###
 
 snmpaddr = '50.76.53.27'		# snmp query device ip address
 snmpcomm = 'galileo'			# snmpv1/v2c community string
@@ -25,13 +25,14 @@ oid2 = '1.3.6.1.4.1.9.9.43.1.1.2.0' 	# ccmHistoryRunningLastSaved
 oid3 = '1.3.6.1.4.1.9.9.43.1.1.3.0' 	# ccmHistorystartupLastChanged
 oid4 = '.1.3.6.1.2.1.1.5.0'		# system name
 
-### EMAIL ALERT INPUTS ###
+# EMAIL ALERT INPUTS ###
 sender = 'week3exercise1@pynet.com'
 recipient = 'freedman.dan@gmail.com'
 subject = 'CONFIGURATION CHANGE ALERT'
 message = '''
 pynet-rtr2 configuration has changed within the last 5 minutes
 '''
+
 
 def CheckConfig():
 	global timestamp
@@ -58,7 +59,6 @@ def CheckConfig():
 timestamp = []
 count = 0
 while count < 60:
-        CheckConfig()
-        count += 5
-        time.sleep(300)
-
+	CheckConfig()
+    count += 5
+    time.sleep(300)

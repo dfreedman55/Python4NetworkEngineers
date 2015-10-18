@@ -3,6 +3,7 @@
 import telnetlib
 import time
 
+
 def main():
 	connection = telnetlib.Telnet(ipadd, TELNET_PORT, TELNET_TIMEOUT)
 	output = connection.read_until('sername:', TELNET_TIMEOUT)
@@ -35,6 +36,3 @@ if __name__ == '__main__':
 	TELNET_PORT = 23
 	TELNET_TIMEOUT = 6
 	main()
-
-
-

@@ -26,7 +26,8 @@ srx = {
 	'port': 9822
 }
 
-rtr2 = ConnectHandler(**pynetrtr2)		# passes in dictionary key values into the function
+rtr2 = ConnectHandler(**pynetrtr2)
+# passes in dictionary key values into the function
 
 output = rtr2.find_prompt()
 print output
