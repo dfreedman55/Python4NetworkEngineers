@@ -5,8 +5,8 @@
       template: src=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/access_switch_ex1.j2
                 dest=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/{{item.hostname}}.txt
       with_items:
-        {hostname: switch10, ip_addr: 10.10.10.100, default_gateway: 10.10.10.1, secret: mysecret, access_vlan: 10, snmp_community: pynet}
-        {hostname: switch20, ip_addr: 10.10.20.100, default_gateway: 10.10.20.1, secret: mysecret, access_vlan: 20, snmp_community: pynet}
-        {hostname: switch30, ip_addr: 10.10.30.100, default_gateway: 10.10.30.1, secret: mysecret, access_vlan: 30, snmp_community: pynet}
-        {hostname: switch40, ip_addr: 10.10.40.100, default_gateway: 10.10.40.1, secret: mysecret, access_vlan: 40, snmp_community: pynet}
-        {hostname: switch50, ip_addr: 10.10.50.100, default_gateway: 10.10.50.1, secret: mysecret, access_vlan: 50, snmp_community: pynet}
+        - {hostname: switch10, ip_addr: 10.10.10.100, default_gateway: 10.10.10.1, secret: mysecret, access_vlan: 10, snmp_community: pynet}
+        - {hostname: switch20, ip_addr: 10.10.20.100, default_gateway: 10.10.20.1, secret: mysecret, access_vlan: 20, snmp_community: pynet}
+        - {hostname: switch30, ip_addr: 10.10.30.100, default_gateway: 10.10.30.1, secret: mysecret, access_vlan: 30, snmp_community: pynet}
+        - {hostname: switch40, ip_addr: 10.10.40.100, default_gateway: 10.10.40.1, secret: mysecret, access_vlan: 40, snmp_community: pynet}
+        - {hostname: switch50, ip_addr: 10.10.50.100, default_gateway: 10.10.50.1, secret: mysecret, access_vlan: 50, snmp_community: pynet}
