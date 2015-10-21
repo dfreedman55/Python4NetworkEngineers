@@ -10,9 +10,7 @@ enable secret 0 {{item.secret}}
 !
 !
 !
-intlist = list(range(1,25))
-!
-{% for intnum in intlist %}
+{% for intnum in list(range(1,25)) %}
 !
 interface FastEthernet 0/{{intnum}}			# where X is the interface number
  switchport access vlan {{item.access_vlan}}                
