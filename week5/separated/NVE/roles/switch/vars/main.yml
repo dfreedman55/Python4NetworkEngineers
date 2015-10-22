@@ -1,0 +1,5 @@
+---
+switch_list:
+  - { hostname: pynet-switch1 }
+  - { hostname: pynet-switch2 }
+  - { hostname: pynet-switch3 }

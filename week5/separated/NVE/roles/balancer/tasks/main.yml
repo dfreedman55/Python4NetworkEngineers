@@ -1,0 +1,4 @@
+---
+- name: Generate Load Balancer Configuration File
+  template: src=balancer_template.j2 dest=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/separated/NVE/roles/balancer/configs/{{item.hostname}}.txt
+  with_items: balancer_list

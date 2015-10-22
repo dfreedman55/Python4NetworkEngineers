@@ -1,0 +1,5 @@
+---
+router_list:
+  - { hostname: pynet-router1 }
+  - { hostname: pynet-router2 }
+  - { hostname: pynet-router3 }

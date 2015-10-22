@@ -1,0 +1,4 @@
+---
+- name: Generate Firewall Configuration File
+  template: src=firewall_template.j2 dest=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/separated/NVE/roles/firewall/configs/{{item.hostname}}.txt
+  with_items: firewall_list

@@ -1,0 +1,5 @@
+---
+firewall_list:
+  - { hostname: pynet-firewall1 }
+  - { hostname: pynet-firewall2 }
+  - { hostname: pynet-firewall3 }

@@ -1,0 +1,7 @@
+---
+- hosts: local
+  roles:
+    - router
+    - switch
+    - balancer
+    - firewall
