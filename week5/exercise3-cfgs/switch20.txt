@@ -1,0 +1,174 @@
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+!
+hostname switch20
+!
+logging buffered 32000
+no logging console
+enable secret 0 mysecret
+!
+!
+!
+!
+!
+interface FastEthernet 0/1			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/2			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/3			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/4			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/5			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/6			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/7			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/8			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/9			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/10			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/11			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/12			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/13			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/14			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/15			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/16			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/17			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/18			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/19			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/20			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/21			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/22			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/23			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+!
+interface FastEthernet 0/24			# where X is the interface number
+ switchport access vlan 20                
+ switchport mode access
+ spanning-tree portfast
+!
+  
+!
+interface Vlan1
+ ip address 10.10.20.100 255.255.255.0
+ no ip route-cache
+!
+ip default-gateway 10.10.20.1
+snmp-server community pynet RO
+!
+!
+line con 0
+line vty 0 4
+ login
+line vty 5 15
+ login
+!
+!
+end

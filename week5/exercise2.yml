@@ -3,7 +3,7 @@
   tasks:
     - name: Generate Configuration File
       template: src=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/access_switch_ex2.j2
-                dest=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/{{item.hostname}}.txt
+                dest=/home/dfreedman/class-exercises/Python4NetworkEngineers/week5/exercise2-cfgs/{{item.hostname}}.txt
       with_items:
         - {hostname: switch10, ip_addr: 10.10.10.100, default_gateway: 10.10.10.1, secret: mysecret, access_vlan: 10, snmp_community: pynet, SNMPver3: False}
         - {hostname: switch20, ip_addr: 10.10.20.100, default_gateway: 10.10.20.1, secret: mysecret, access_vlan: 20, snmp_community: pynet, SNMPver3: False}
