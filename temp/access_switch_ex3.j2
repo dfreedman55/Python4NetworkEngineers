@@ -42,6 +42,20 @@ line vty 5 15
  login
 !
 !
+# WITH NESTING
+#!
+#{% if item.DHCP %}
+#ip dhcp test
+#!
+#{% if item.DHCPVOICE %}
+#ip dhcpvoice test
+#!
+#{% endif %}
+#!
+#{% endif %}
+!
+# WITHOUT NESTING
+!
 {% if item.DHCP %}
 ip dhcp test
 {% endif %}
@@ -49,5 +63,6 @@ ip dhcp test
 {% if item.DHCPVOICE %}
 ip dhcpvoice test
 {% endif %}
+!
 !
 end
