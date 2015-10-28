@@ -1,3 +1,17 @@
+object-group protocol test-protocol1
+  group-object test-protocol2
+  protocol-object tcp
+
+object-group protocol test-protocol2
+  protocol-object udp
+
+object-group service gr-proview-servers
+  group-object dan
+  service-object tcp destination eq 443
+
+object-group service dan
+  service-object tcp destination eq 80
+
 object-group network eric
   network-object 40.40.40.40 255.255.255.0
 
