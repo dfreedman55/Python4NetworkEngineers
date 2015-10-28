@@ -26,6 +26,8 @@ object-group network gr-proview-application-services
 
 access-list Customer_access_in extended permit object-group gr-proview-application-services 20.20.20.20 255.255.255.255 eq 80
 access-list Customer_access_in extended permit object-group gr-proview-application-services object-group DM_INLINE_NETWORK_42 object-group gr-proview-servers
+access-list Customer_access_out extended permit host 1.1.1.1 host 2.2.2.2 eq 80
+access-list Customer_dmz_in extended permit host 5.5.5.5 host 6.6.6.6 eq 80
 
 access-group Customer_access_in in interface outside
 access-group Customer_access_out in interface inside

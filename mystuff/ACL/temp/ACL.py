@@ -5,6 +5,29 @@ from ciscoconfparse import CiscoConfParse
 from pprint import pprint
 import re
 
+# FILE HANDLING FUNCTIONS
+
+def ingest_file(filename):
+    with open('sourcefile.txt', 'r') as f:
+        my_config = f.read()
+    return my_config
+
+# ACL PROCESSING FUNCTIONS
+
+def create_listuniqueacl(my_config):
+    for item in my_config.strip().split('\n'):
+        if 'access-list' in item:
+            if item.split(' ')[1] not in my_acl_list:
+                my_acl_list.append(item.split(' ')[1])
+
+def create_dictacls(my_config, my_acl_list):
+    for index, aclname in enumerate(my_acl_list):
+        my_current_acl = []
+        for line in my_config.strip().split('\n'):
+            if my_acl_list[index] in line:
+                my_current_acl.append(line)
+        in_acl_dict[my_acl_list[index]] = my_current_acl
+
 # INTERFACE ACL FUNCTIONS
 
 def create_listintfacls(filename):
@@ -87,6 +110,14 @@ def print_netobj(dictobjgrps,netobj):
 
 # MAIN
 
+my_config = ingest_file('sourcefile.txt')						# ingest source configuration file (.txt)
+
+my_acl_list = []									# define a list for unique ACLs names
+create_listuniqueacl(my_config)								# populate list with unique ACL names
+
+in_acl_dict = {}									# define a dictionary for ACLs
+create_dictacls(my_config, my_acl_list)							# populate dictionary with ACLs
+
 listintfacls = create_listintfacls('sourcefile.txt')					# create a list of interface ACLs
 dictintfacls = {}									# define a dictionary for the interface ACLs
 create_dictintfacls(listintfacls)			                		# populate dictionary with interface ACLs
@@ -98,6 +129,10 @@ create_dictobjgrps(listobjgrps)								# populate dictionary with network object
 # OUTPUT EXAMPLES
 
 print ''
+print 'PRINT ACL DICTIONARY'
+pprint(in_acl_dict)
+print ''
+
 print 'PRETTY PRINT THE DICTIONARY OF NETWORK OBJECT-GROUPS:\n'
 pprint(dictobjgrps)									# pretty print the dictionary of network object-groups
 print ''
@@ -126,41 +161,34 @@ print ''
 
 
 ####################################################################################################################################################
-
-(applied_python)[dfreedman@ip-172-30-0-111 ACL]$ cat ACL.py 
-
-# PROGRAM
-
-from collections import OrderedDict
-from ciscoconfparse import CiscoConfParse
-from pprint import pprint
-import re
-
+#
+#(applied_python)[dfreedman@ip-172-30-0-111 ACL]$ cat ACL.py 
+#
 # FUNCTIONS
-
-def find_og_members(groupname):
-    config = CiscoConfParse('sourcefile.txt')
-    lines = config.find_objects(groupname)
-    my_og_dict = OrderedDict()
-    i = 0
-    for parent_item in lines:
-        if 'access-list' not in parent_item.text:
-            print parent_item.text
-            my_og_dict[i] = parent_item.text
-            i += 1
-            for child_item in parent_item.all_children:
-                if 'group-object' in child_item.text:
-#                   print child_item.text
-                    go_name = child_item.text.strip().split(' ')[1]
-                    go_return = find_og_members(go_name)
-                    my_og_dict[i] = go_return
-#                   print parent_item.text
-                else:
-                    my_og_dict[i] = child_item.text
-#                    print child_item.text
-                i += 1
-    return my_og_dict
-
+#
+#def find_og_members(groupname):
+#    config = CiscoConfParse('sourcefile.txt')
+#    lines = config.find_objects(groupname)
+#    my_og_dict = OrderedDict()
+#    i = 0
+#    for parent_item in lines:
+#        if 'access-list' not in parent_item.text:
+#            print parent_item.text
+#            my_og_dict[i] = parent_item.text
+#            i += 1
+#            for child_item in parent_item.all_children:
+#                if 'group-object' in child_item.text:
+#                    #print child_item.text
+#                    go_name = child_item.text.strip().split(' ')[1]
+#                    go_return = find_og_members(go_name)
+#                    my_og_dict[i] = go_return
+#                    #print parent_item.text
+#                else:
+#                    my_og_dict[i] = child_item.text
+#                    #print child_item.text
+#                i += 1
+#    return my_og_dict
+#
 ## INGEST ORIGINAL .TXT FILE
 #with open('sourcefile.txt', 'r') as f:
 #    my_temp_config = f.read()
@@ -173,6 +201,8 @@ def find_og_members(groupname):
 ## INGEST STANDARDIZED .TXT FILE
 #with open('standardized.txt', 'r') as f:
 #    my_config = f.read()
+#
+
 
 # INGEST ORIGINAL .TXT FILE
 with open('sourcefile.txt', 'r') as f:
@@ -195,10 +225,18 @@ for index, aclname in enumerate(my_acl_list):
     in_acl_dict[my_acl_list[index]] = my_current_acl
 
 pprint(in_acl_dict)
+#
 #for item in in_acl_dict['outside_in']:
 #    print item
+#
+#
+#
 
 # FOR EACH ACL DETERMINE COMPONENT PARTS OF CURRENT ACL
+#
+
+
+
 
 out_acl_dict = {}
 for aclname, aclentries in in_acl_dict.items():                 # FOR EACH ACLNAME/LISTOFACLENTRIES IN {DICTIONARY}
@@ -208,6 +246,10 @@ for aclname, aclentries in in_acl_dict.items():                 # FOR EACH ACLNA
 
         my_acl_objects = re.search(r'access-list (.+?) extended permit (.+?) (.+?) (.+?) (.+?) (.+?) (.+)', aclentry)
         print my_acl_objects
+
+
+
+
 #       print 'FULL: %s' % my_acl_objects.group(0)
 #       print 'NAME: %s' % my_acl_objects.group(1)
 #       print 'SRC: %s' % my_acl_objects.group(2)
@@ -217,7 +259,7 @@ for aclname, aclentries in in_acl_dict.items():                 # FOR EACH ACLNA
 #       print 'PRT: %s' % my_acl_objects.group(6)
 #       print 'VAL: %s' % my_acl_objects.group(7)
 #       print '\n'
-
+#
 #        if 'object-group' not in aclentry:
 #               print 'ADD ACL AS IS TO DICTIONARY'
 #               print 'ACLENTRY: %s' % aclentry
@@ -243,48 +285,48 @@ for aclname, aclentries in in_acl_dict.items():                 # FOR EACH ACLNA
 #               print 'SRC: %s' % my_acl_objects.group(3)
 #               print 'DST: %s' % my_acl_objects.group(5)
 #               print 'PRT: %s' % my_acl_objects.group(7)
- #               src_og = find_og_members(my_acl_objects.group(3))
-  #              dst_og = find_og_members(my_acl_objects.group(5))
+#               src_og = find_og_members(my_acl_objects.group(3))
+#               dst_og = find_og_members(my_acl_objects.group(5))
 #               print '\n'
-
+#
 #       if ('object-group' in aclentry) and (aclentry.count('object-group') == 2) and ('object-group' in my_acl_objects.group(2)) and ('object-group' not in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
 #               print 'IDENTIFY SRC AND PRT OBJECT GROUPS'
 #               print 'ACLENTRY: %s' % aclentry
 #               print 'SRC: %s' % my_acl_objects.group(3)
 #               print 'DST: %s' % my_acl_objects.group(5)
 #               print 'PRT: %s' % my_acl_objects.group(7)
- #               src_og = find_og_members(my_acl_objects.group(3))
-  #              prt_og = find_og_members(my_acl_objects.group(7))
+#               src_og = find_og_members(my_acl_objects.group(3))
+#               prt_og = find_og_members(my_acl_objects.group(7))
 #               print '\n'
-
+#
 #       if ('object-group' in aclentry) and (aclentry.count('object-group') == 2) and ('object-group' not in my_acl_objects.group(2)) and ('object-group' in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
 #               print 'IDENTIFY DST AND PRT OBJECT GROUPS'
 #               print 'ACLENTRY: %s' % aclentry
 #               print 'SRC: %s' % my_acl_objects.group(3)
 #               print 'DST: %s' % my_acl_objects.group(5)
 #               print 'PRT: %s' % my_acl_objects.group(7)
- #               dst_og = find_og_members(my_acl_objects.group(5))
-  #              prt_og = find_og_members(my_acl_objects.group(7))
+#               dst_og = find_og_members(my_acl_objects.group(5))
+#               prt_og = find_og_members(my_acl_objects.group(7))
 #               print '\n'
-
+#
 #       if ('object-group' in aclentry) and (aclentry.count('object-group') == 1) and ('object-group' in my_acl_objects.group(2)) and ('object-group' not in my_acl_objects.group(4)) and ('object-group' not in my_acl_objects.group(6)):
 #               print 'IDENTIFY SRC OBJECT GROUP'
 #               print 'ACLENTRY: %s' % aclentry
 #               print 'SRC: %s' % my_acl_objects.group(3)
 #               print 'DST: %s' % my_acl_objects.group(5)
 #               print 'PRT: %s' % my_acl_objects.group(7)
- #               src_og = find_og_members(my_acl_objects.group(3))
+#               src_og = find_og_members(my_acl_objects.group(3))
 #               print '\n'
-
+#
 #       if ('object-group' in aclentry) and (aclentry.count('object-group') == 1) and ('object-group' not in my_acl_objects.group(2)) and ('object-group' in my_acl_objects.group(4)) and ('object-group' not in my_acl_objects.group(6)):
 #               print 'IDENTIFY DST OBJECT GROUP'
 #               print 'ACLENTRY: %s' % aclentry
 #               print 'SRC: %s' % my_acl_objects.group(3)
 #               print 'DST: %s' % my_acl_objects.group(5)
 #               print 'PRT: %s' % my_acl_objects.group(7)
- #               dst_og = find_og_members(my_acl_objects.group(5))
+#               dst_og = find_og_members(my_acl_objects.group(5))
 #               print '\n'
-
+#
 #       if ('object-group' in aclentry) and (aclentry.count('object-group') == 1) and ('object-group' not in my_acl_objects.group(2)) and ('object-group' not in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
 #               print 'IDENTIFY PRT OBJECT GROUP'
 #               print 'ACLENTRY: %s' % aclentry
@@ -293,18 +335,18 @@ for aclname, aclentries in in_acl_dict.items():                 # FOR EACH ACLNA
 #               print 'PRT: %s' % my_acl_objects.group(7)
 #               prt_og = find_og_members(my_acl_objects.group(7))
 #               print '\n'
-
-
-
-
-
-
-
-
-
-
-
-
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 # TEMPLATE ACL
 #myacl = 'access-list Customer_access_in extended permit object-group gr-proview-application-services object-group DM_INLINE_NETWORK_42 object-group gr-proview-servers'
 #
