@@ -1,0 +1,17 @@
+object-group network eric
+  network-object 40.40.40.40 255.255.255.0
+
+object-group network dan
+  group-object eric
+  network-object 30.30.30.30 255.255.255.0
+
+object-group network gr-proview-application-services
+  group-object dan
+  network-object 10.10.10.10 255.255.255.0
+  network-object 11.11.11.11 255.255.255.0
+
+access-list Customer_access_in extended permit object-group gr-proview-application-services 20.20.20.20 255.255.255.255 eq 80
+access-list Customer_access_in extended permit object-group gr-proview-application-services object-group DM_INLINE_NETWORK_42 object-group gr-proview-servers
+
+access-group Customer_access_in in interface outside
+access-group Customer_access_out in interface inside
