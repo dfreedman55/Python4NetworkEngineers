@@ -1,9 +1,5 @@
-object-group protocol test-protocol1
-  group-object test-protocol2
+object-group protocol dan
   protocol-object tcp
-
-object-group protocol test-protocol2
-  protocol-object udp
 
 object-group service gr-proview-servers
   group-object dan
@@ -24,10 +20,16 @@ object-group network gr-proview-application-services
   network-object 10.10.10.10 255.255.255.0
   network-object 11.11.11.11 255.255.255.0
 
+object-group network DM_INLINE_NETWORK_42
+ network-object 12.12.12.12 255.255.255.0
+ network-object 13.13.13.13 255.255.255.0
+
 access-list Customer_access_in extended permit object-group gr-proview-application-services 20.20.20.20 255.255.255.255 eq 80
 access-list Customer_access_in extended permit object-group gr-proview-application-services object-group DM_INLINE_NETWORK_42 object-group gr-proview-servers
 access-list Customer_access_out extended permit host 1.1.1.1 host 2.2.2.2 eq 80
 access-list Customer_dmz_in extended permit host 5.5.5.5 host 6.6.6.6 eq 80
+access-list DAN extended permit host 10.10.10.10 host 20.20.20.20 eq 80
 
 access-group Customer_access_in in interface outside
 access-group Customer_access_out in interface inside
+access-group Customer_dmz_in in interface dmz
