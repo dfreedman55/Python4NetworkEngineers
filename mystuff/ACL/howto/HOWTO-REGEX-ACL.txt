@@ -1,0 +1,136 @@
+# TEMPLATE ACL
+#myacl = 'access-list Customer_access_in extended permit object-group gr-proview-application-services object-group DM_INLINE_NETWORK_42 object-group gr-proview-servers'
+#
+#                                 1                       2     3     4     5     6     7
+#mylist = re.search(r'access-list (.+?) extended permit (.+?) (.+?) (.+?) (.+?) (.+?) (.+)', myacl)
+#                                 name                   src   val   dst   val   prt   val
+#>>> mylist.group(0)
+#'access-list Customer_access_in extended permit object-group gr-proview-application-services object-group DM_INLINE_NETWORK_42 object-group gr-proview-servers'
+#>>> mylist.group(1)
+#'Customer_access_in'
+#>>> mylist.group(2)
+#'object-group'
+#>>> mylist.group(3)
+#'gr-proview-application-services'
+#>>> mylist.group(4)
+#'object-group'
+#>>> mylist.group(5)
+#'DM_INLINE_NETWORK_42'
+#>>> mylist.group(6)
+#'object-group'
+#>>> mylist.group(7)
+#'gr-proview-servers'
+#>>>
+#consider using CiscoConfParse parent/child relationship for this
+#out_acl_dict = OrderedDict{'dmz_in': [ {source: [objects], destination: [objects], ports: [objects]} ] }
+
+
+
+
+# FOR EACH ACL DETERMINE COMPONENT PARTS OF CURRENT ACL
+
+out_acl_dict = {}
+for aclname, aclentries in in_acl_dict.items():			# FOR EACH ACLNAME/LISTOFACLENTRIES IN {DICTIONARY}
+    #print aclname						# PRINT ACLNAME
+    for index, aclentry in enumerate(aclentries):		# FOR EACH INDEX/ACLENTRY IN [LISTOFACLENTRIES]
+        #print index, aclentry					# PRINT INDEX ACLENTRY
+
+	my_acl_objects = re.search(r'access-list (.+?) extended permit (.+?) (.+?) (.+?) (.+?) (.+?) (.+)', aclentry)
+	print my_acl_objects
+#	print 'FULL: %s' % my_acl_objects.group(0)
+#	print 'NAME: %s' % my_acl_objects.group(1)
+#	print 'SRC: %s' % my_acl_objects.group(2)
+#	print 'VAL: %s' % my_acl_objects.group(3)
+#	print 'DST: %s' % my_acl_objects.group(4)
+#	print 'VAL: %s' % my_acl_objects.group(5)
+#	print 'PRT: %s' % my_acl_objects.group(6)
+#	print 'VAL: %s' % my_acl_objects.group(7)
+#	print '\n'
+
+#        if 'object-group' not in aclentry:
+#		print 'ADD ACL AS IS TO DICTIONARY'
+#		print 'ACLENTRY: %s' % aclentry
+#		print '\n'
+
+	if ('object-group' in aclentry) and (aclentry.count('object-group') == 3) and ('object-group' in my_acl_objects.group(2)) and ('object-group' in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
+		print 'IDENTIFY SRC AND DST AND PRT OBJECT GROUPS'
+		print 'ACLENTRY: %s' % aclentry
+		print 'SRC: %s' % my_acl_objects.group(3)
+ 		print 'DST: %s' % my_acl_objects.group(5)
+		print 'PRT: %s' % my_acl_objects.group(7)
+		src_og = find_og_members(my_acl_objects.group(3))
+                dst_og = find_og_members(my_acl_objects.group(5))
+                prt_og = find_og_members(my_acl_objects.group(7))
+		print '\n'
+                print src_og
+                print dst_og
+                print prt_og
+
+#	if ('object-group' in aclentry) and (aclentry.count('object-group') == 2) and ('object-group' in my_acl_objects.group(2)) and ('object-group' in my_acl_objects.group(4)) and ('object-group' not in my_acl_objects.group(6)):
+#		print 'IDENTIFY SRC AND DST OBJECT GROUPS'
+#		print 'ACLENTRY: %s' % aclentry
+#		print 'SRC: %s' % my_acl_objects.group(3)
+#		print 'DST: %s' % my_acl_objects.group(5)
+#		print 'PRT: %s' % my_acl_objects.group(7)
+ #               src_og = find_og_members(my_acl_objects.group(3))
+  #              dst_og = find_og_members(my_acl_objects.group(5))
+#		print '\n'
+
+#	if ('object-group' in aclentry) and (aclentry.count('object-group') == 2) and ('object-group' in my_acl_objects.group(2)) and ('object-group' not in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
+#		print 'IDENTIFY SRC AND PRT OBJECT GROUPS'
+#		print 'ACLENTRY: %s' % aclentry
+#		print 'SRC: %s' % my_acl_objects.group(3)
+#		print 'DST: %s' % my_acl_objects.group(5)
+#		print 'PRT: %s' % my_acl_objects.group(7)		
+ #               src_og = find_og_members(my_acl_objects.group(3))
+  #              prt_og = find_og_members(my_acl_objects.group(7))
+#		print '\n'
+
+#	if ('object-group' in aclentry) and (aclentry.count('object-group') == 2) and ('object-group' not in my_acl_objects.group(2)) and ('object-group' in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
+#		print 'IDENTIFY DST AND PRT OBJECT GROUPS'
+#		print 'ACLENTRY: %s' % aclentry
+#		print 'SRC: %s' % my_acl_objects.group(3)
+#		print 'DST: %s' % my_acl_objects.group(5)
+#		print 'PRT: %s' % my_acl_objects.group(7)
+ #               dst_og = find_og_members(my_acl_objects.group(5))
+  #              prt_og = find_og_members(my_acl_objects.group(7))
+#		print '\n'
+
+#	if ('object-group' in aclentry) and (aclentry.count('object-group') == 1) and ('object-group' in my_acl_objects.group(2)) and ('object-group' not in my_acl_objects.group(4)) and ('object-group' not in my_acl_objects.group(6)):
+#		print 'IDENTIFY SRC OBJECT GROUP'
+#		print 'ACLENTRY: %s' % aclentry
+#		print 'SRC: %s' % my_acl_objects.group(3)
+#		print 'DST: %s' % my_acl_objects.group(5)
+#		print 'PRT: %s' % my_acl_objects.group(7)
+ #               src_og = find_og_members(my_acl_objects.group(3))
+#		print '\n'
+
+#	if ('object-group' in aclentry) and (aclentry.count('object-group') == 1) and ('object-group' not in my_acl_objects.group(2)) and ('object-group' in my_acl_objects.group(4)) and ('object-group' not in my_acl_objects.group(6)):
+#		print 'IDENTIFY DST OBJECT GROUP'
+#		print 'ACLENTRY: %s' % aclentry
+#		print 'SRC: %s' % my_acl_objects.group(3)
+#		print 'DST: %s' % my_acl_objects.group(5)
+#		print 'PRT: %s' % my_acl_objects.group(7)
+ #               dst_og = find_og_members(my_acl_objects.group(5))
+#		print '\n'
+
+#	if ('object-group' in aclentry) and (aclentry.count('object-group') == 1) and ('object-group' not in my_acl_objects.group(2)) and ('object-group' not in my_acl_objects.group(4)) and ('object-group' in my_acl_objects.group(6)):
+#		print 'IDENTIFY PRT OBJECT GROUP'
+#		print 'ACLENTRY: %s' % aclentry
+#		print 'SRC: %s' % my_acl_objects.group(3)
+#		print 'DST: %s' % my_acl_objects.group(5)
+#		print 'PRT: %s' % my_acl_objects.group(7)
+#		prt_og = find_og_members(my_acl_objects.group(7))
+#		print '\n'
+
+
+
+
+
+
+
+
+
+
+
+
