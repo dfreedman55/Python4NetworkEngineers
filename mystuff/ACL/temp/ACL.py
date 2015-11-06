@@ -1,53 +1,9 @@
-'''NAMING CONVENTION
-cd = create dictionary
-nog = network object group
-sog = service object group
-pog = protocol object group
-sep = separate
-dep = dependencies
-dct = dictionaries
-
-FUNCTIONS
-nog_cd			sog_cd			pog_cd
-nog_sep			sog_sep			pog_sep
-nog_sep_l2		sog_sep_l2		pog_sep_l2
-nog_sep_l3		sog_sep_l3		pog_sep_l3
-nog_sep_l4		sog_sep_l4		pog_sep_l4
-nog_sep_l5		sog_sep_l5		pog_sep_l5
-nog_sep_l6		sog_sep_l6		pog_sep_l6
-nog_sep_l7		sog_sep_l7		pog_sep_l7
-nog_sep_l8		sog_sep_l8		pog_sep_l8
-
-DICTIONARIES
-nog_all			sog_all			pog_all
-nog_dep_none    	sog_dep_none	        pog_dep_none
-nog_dep			sog_dep			pog_dep
-nog_dep_l2		sog_dep_l2		pog_dep_l2
-nog_dep_l3		sog_dep_l3		pog_dep_l3
-nog_dep_l4		sog_dep_l4		pog_dep_l4
-nog_dep_l5		sog_dep_l5		pog_dep_l5
-nog_dep_l6		sog_dep_l6		pog_dep_l6
-nog_dep_l7		sog_dep_l7		pog_dep_l7
-nog_dep_l8		sog_dep_l8		pog_dep_l8
-
-RESULTS
-nog_dct_all		sog_dct_all		pog_dct_all
-nog_dct_sep		sog_dct_sep		pog_dct_sep
-nog_dct_l2		sog_dct_l2		pog_dct_l2
-nog_dct_l3		sog_dct_l3		pog_dct_l3
-nog_dct_l4		sog_dct_l4		pog_dct_l4
-nog_dct_l5		sog_dct_l5		pog_dct_l5
-nog_dct_l6		sog_dct_l6		pog_dct_l6
-nog_dct_l7		sog_dct_l7		pog_dct_l7
-nog_dct_l8		sog_dct_l8		pog_dct_l8'''
-
-
 # INITIALIZATION
 
 
 from collections import OrderedDict
 from ciscoconfparse import CiscoConfParse
-# from pprint import pprint
+from pprint import pprint
 # import re
 
 nog_done = False
@@ -62,7 +18,7 @@ def ifile(fname):
     '''
     Ingest file and return as variable mycfg
     '''
-    with open(fname, 'r') as f:                     
+    with open(fname, 'r') as f:
         mycfg = f.read()
     return mycfg
 
@@ -94,6 +50,43 @@ def cd_acls(mycfg):
     return acls
 
 
+def create_config_from_acl_dict():
+    '''
+    Create a list of all ACL entries within the ACL dictionary
+    Join the items in the list to create a cohesive representation of config
+    '''
+    acls = cd_acls(mycfg)
+    acl_config = []
+    for aclname, aclentries in acls.items():
+        for i, aclentry in enumerate(aclentries):
+            acl_config.append(aclentry)
+    acl_config = '\n'.join(acl_config)
+    return acl_config
+
+
+def cl_unique_grpobjects(mycfg):
+    '''
+    Create list of unique group-objects (nested) within the configuration
+    '''
+    unique_grpobjects = []
+    for line in mycfg.split('\n'):
+        if 'group-object' in line:
+            if line not in unique_grpobjects:
+                unique_grpobjects.append(line)
+    return unique_grpobjects
+
+
+def cl_unique_objgroups(mycfg):
+    '''
+    Create list of unique object-groups within the configuration
+    '''
+    unique_objgroups = []
+    for line in mycfg.split('\n'):
+        if ('object-group' in line) and ('access-list' not in line):
+            unique_objgroups.append(line)
+    return unique_objgroups
+
+
 def cl_bound_acls(mycfg):
     '''
     Create list of ACLs which are actually bound to interfaces
@@ -123,8 +116,10 @@ def cl_unbound_acls(mycfg):
 
 def cl_unbound_objgroups(mycfg):
     '''
-    Create list of object groups which are not referenced directly by an ACL (unbound object group list) - for loop
-    Object groups referenced indirectly by other object groups (nested) are bound (remove from unbound object group list) - while loop
+    Create list of object groups which are not referenced directly by an ACL
+    (unbound object group list) - for loop
+    Object groups referenced indirectly by other object groups are bound
+    (remove from unbound object group list) - while loop
     '''
     acl_config = create_config_from_acl_dict()
     unique_grpobjects = cl_unique_grpobjects(mycfg)
@@ -146,6 +141,30 @@ def cl_unbound_objgroups(mycfg):
             else:
                 i = 0
     return unbound_objgroups
+
+
+# FORMATTING FUNCTIONS
+
+def objgroup_remove_type(item):
+    '''
+    Remove <type> from "object-group <type> <name>"
+    Before comparison to the group-objects list
+    '''
+    item = item.split(' ')
+    item.pop(1)
+    item = ' '.join(item)
+    return item
+
+
+def objgroup_insert_type(item, type):
+    '''
+    Insert <type> into "object-group <type> <name>"
+    After comparison to the group-objects list
+    '''
+    item = item.split(' ')
+    item.insert(1, type)
+    item = ' '.join(item)
+    return item
 
 
 # NETWORK OBJECT GROUP FUNCTIONS
@@ -646,261 +665,12 @@ def pog_sep_l8(pog_dep, l7_items):
         return [pog_dep, pog_dep_l8]
 
 
-# NETWORK OBJECT GROUP MAIN
-
-
-nog_dct_all = nog_cd('sourcefile.txt')
-
-nog_dct_sep = nog_sep(nog_dct_all)
-print '{}:\n{}\n'.format('NO NOG DEPENDENCIES', nog_dct_sep[0])
-print '{}:\n{}\n'.format('NOG DEPENDENCIES', nog_dct_sep[1])
-
-if nog_done is not True:
-    try:
-        nog_dct_l2 = nog_sep_l2(nog_dct_sep[0], nog_dct_sep[1])
-        print '{}:\n{}\n'.format('STEP2: NOG DEPENDENCIES', nog_dct_l2[0])
-        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', nog_dct_l2[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is not True:
-    try:
-        nog_dct_l3 = nog_sep_l3(nog_dct_l2[0], nog_dct_l2[1])
-        print '{}:\n{}\n'.format('STEP3: NOG DEPENDENCIES', nog_dct_l3[0])
-        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', nog_dct_l3[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is not True:
-    try:
-        nog_dct_l4 = nog_sep_l4(nog_dct_l3[0], nog_dct_l3[1])
-        print '{}:\n{}\n'.format('STEP4: NOG DEPENDENCIES', nog_dct_l4[0])
-        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', nog_dct_l4[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is not True:
-    try:
-        nog_dct_l5 = nog_sep_l5(nog_dct_l4[0], nog_dct_l4[1])
-        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l5[0])
-        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', nog_dct_l5[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is not True:
-    try:
-        nog_dct_l6 = nog_sep_l6(nog_dct_l5[0], nog_dct_l5[1])
-        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l6[0])
-        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', nog_dct_l6[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is not True:
-    try:
-        nog_dct_l7 = nog_sep_l7(nog_dct_l6[0], nog_dct_l6[1])
-        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l7[0])
-        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', nog_dct_l7[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is not True:
-    try:
-        nog_dct_l8 = nog_sep_l8(nog_dct_l7[0], nog_dct_l7[1])
-        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l8[0])
-        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', nog_dct_l8[1])
-    except TypeError:
-        nog_done = True
-    except NameError:
-        nog_done = True
-
-if nog_done is True:
-    print 'ALL NOG DEPENDENCIES RESOLVED\n'
-
-
-# SERVICE OBJECT GROUP MAIN
-
-
-sog_dct_all = sog_cd('sourcefile.txt')
-
-sog_dct_sep = sog_sep(sog_dct_all)
-print '{}:\n{}\n'.format('NO SOG DEPENDENCIES', sog_dct_sep[0])
-print '{}:\n{}\n'.format('SOG DEPENDENCIES', sog_dct_sep[1])
-
-if sog_done is not True:
-    try:
-        sog_dct_l2 = sog_sep_l2(sog_dct_sep[0], sog_dct_sep[1])
-        print '{}:\n{}\n'.format('STEP2: SOG DEPENDENCIES', sog_dct_l2[0])
-        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', sog_dct_l2[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is not True:
-    try:
-        sog_dct_l3 = sog_sep_l3(sog_dct_l2[0], sog_dct_l2[1])
-        print '{}:\n{}\n'.format('STEP3: SOG DEPENDENCIES', sog_dct_l3[0])
-        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', sog_dct_l3[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is not True:
-    try:
-        sog_dct_l4 = sog_sep_l4(sog_dct_l3[0], sog_dct_l3[1])
-        print '{}:\n{}\n'.format('STEP4: SOG DEPENDENCIES', sog_dct_l4[0])
-        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', sog_dct_l4[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is not True:
-    try:
-        sog_dct_l5 = sog_sep_l5(sog_dct_l4[0], sog_dct_l4[1])
-        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l5[0])
-        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', sog_dct_l5[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is not True:
-    try:
-        sog_dct_l6 = sog_sep_l6(sog_dct_l5[0], sog_dct_l5[1])
-        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l6[0])
-        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', sog_dct_l6[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is not True:
-    try:
-        sog_dct_l7 = sog_sep_l7(sog_dct_l6[0], sog_dct_l6[1])
-        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l7[0])
-        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', sog_dct_l7[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is not True:
-    try:
-        sog_dct_l8 = sog_sep_l8(sog_dct_l7[0], sog_dct_l7[1])
-        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l8[0])
-        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', sog_dct_l8[1])
-    except TypeError:
-        sog_done = True
-    except NameError:
-        sog_done = True
-
-if sog_done is True:
-    print 'ALL SOG DEPENDENCIES RESOLVED\n'
-
-
-# PROTOCOL OBJECT GROUP MAIN
-
-
-pog_dct_all = pog_cd('sourcefile.txt')
-
-pog_dct_sep = pog_sep(pog_dct_all)
-print '{}:\n{}\n'.format('NO POG DEPENDENCIES', pog_dct_sep[0])
-print '{}:\n{}\n'.format('POG DEPENDENCIES', pog_dct_sep[1])
-
-if pog_done is not True:
-    try:
-        pog_dct_l2 = pog_sep_l2(pog_dct_sep[0], pog_dct_sep[1])
-        print '{}:\n{}\n'.format('STEP2: POG DEPENDENCIES', pog_dct_l2[0])
-        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', pog_dct_l2[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is not True:
-    try:
-        pog_dct_l3 = pog_sep_l3(pog_dct_l2[0], pog_dct_l2[1])
-        print '{}:\n{}\n'.format('STEP3: POG DEPENDENCIES', pog_dct_l3[0])
-        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', pog_dct_l3[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is not True:
-    try:
-        pog_dct_l4 = pog_sep_l4(pog_dct_l3[0], pog_dct_l3[1])
-        print '{}:\n{}\n'.format('STEP4: POG DEPENDENCIES', pog_dct_l4[0])
-        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', pog_dct_l4[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is not True:
-    try:
-        pog_dct_l5 = pog_sep_l5(pog_dct_l4[0], pog_dct_l4[1])
-        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l5[0])
-        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', pog_dct_l5[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is not True:
-    try:
-        pog_dct_l6 = pog_sep_l6(pog_dct_l5[0], pog_dct_l5[1])
-        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l6[0])
-        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', pog_dct_l6[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is not True:
-    try:
-        pog_dct_l7 = pog_sep_l7(pog_dct_l6[0], pog_dct_l6[1])
-        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l7[0])
-        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', pog_dct_l7[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is not True:
-    try:
-        pog_dct_l8 = pog_sep_l8(pog_dct_l7[0], pog_dct_l7[1])
-        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l8[0])
-        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', pog_dct_l8[1])
-    except TypeError:
-        pog_done = True
-    except NameError:
-        pog_done = True
-
-if pog_done is True:
-    print 'ALL POG DEPENDENCIES RESOLVED'
-
-
-# PRINT ALL DICTIONARIES
+# PRINTING FUNCTIONS
 
 
 def print_nog_dcts():
     try:
-        with open('output.txt', 'w') as f:
+        with open('output.txt', 'a') as f:
             for key, value in nog_dct_sep[0].iteritems():
                 f.write(key + '\n')
                 for item in value:
@@ -1020,13 +790,322 @@ def print_pog_dcts():
     except NameError:
         pass
 
-print_nog_dcts()
-print_sog_dcts()
-print_pog_dcts()
+
+# MAIN
 
 
 mycfg = ifile('sourcefile.txt')
+acls = cl_unique_acls(mycfg)
+acls_bound = cl_bound_acls(mycfg)
+acls_unbound = cl_unbound_acls(mycfg)
+objs_unbound = cl_unbound_objgroups(mycfg)
 print '%s:\n%s\n' % ('UNIQUE ACLS', cl_unique_acls(mycfg))
 print '%s:\n%s\n' % ('BOUND ACLS', cl_bound_acls(mycfg))
 print '%s:\n%s\n' % ('UNBOUND ACLS', cl_unbound_acls(mycfg))
 print '%s:\n%s\n' % ('UNBOUND OBJECT GROUPS', cl_unbound_objgroups(mycfg))
+
+
+# NETWORK OBJECT GROUPS
+
+
+nog_dct_all = nog_cd('sourcefile.txt')
+
+nog_dct_sep = nog_sep(nog_dct_all)
+print '{}:\n{}\n'.format('NO NOG DEPENDENCIES', nog_dct_sep[0])
+print '{}:\n{}\n'.format('NOG DEPENDENCIES', nog_dct_sep[1])
+
+if nog_done is not True:
+    try:
+        nog_dct_l2 = nog_sep_l2(nog_dct_sep[0], nog_dct_sep[1])
+        print '{}:\n{}\n'.format('STEP2: NOG DEPENDENCIES', nog_dct_l2[0])
+        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', nog_dct_l2[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is not True:
+    try:
+        nog_dct_l3 = nog_sep_l3(nog_dct_l2[0], nog_dct_l2[1])
+        print '{}:\n{}\n'.format('STEP3: NOG DEPENDENCIES', nog_dct_l3[0])
+        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', nog_dct_l3[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is not True:
+    try:
+        nog_dct_l4 = nog_sep_l4(nog_dct_l3[0], nog_dct_l3[1])
+        print '{}:\n{}\n'.format('STEP4: NOG DEPENDENCIES', nog_dct_l4[0])
+        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', nog_dct_l4[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is not True:
+    try:
+        nog_dct_l5 = nog_sep_l5(nog_dct_l4[0], nog_dct_l4[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l5[0])
+        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', nog_dct_l5[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is not True:
+    try:
+        nog_dct_l6 = nog_sep_l6(nog_dct_l5[0], nog_dct_l5[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l6[0])
+        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', nog_dct_l6[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is not True:
+    try:
+        nog_dct_l7 = nog_sep_l7(nog_dct_l6[0], nog_dct_l6[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l7[0])
+        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', nog_dct_l7[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is not True:
+    try:
+        nog_dct_l8 = nog_sep_l8(nog_dct_l7[0], nog_dct_l7[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l8[0])
+        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', nog_dct_l8[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
+
+if nog_done is True:
+    print 'ALL NOG DEPENDENCIES RESOLVED\n'
+
+
+# SERVICE OBJECT GROUPS
+
+
+sog_dct_all = sog_cd('sourcefile.txt')
+
+sog_dct_sep = sog_sep(sog_dct_all)
+print '{}:\n{}\n'.format('NO SOG DEPENDENCIES', sog_dct_sep[0])
+print '{}:\n{}\n'.format('SOG DEPENDENCIES', sog_dct_sep[1])
+
+if sog_done is not True:
+    try:
+        sog_dct_l2 = sog_sep_l2(sog_dct_sep[0], sog_dct_sep[1])
+        print '{}:\n{}\n'.format('STEP2: SOG DEPENDENCIES', sog_dct_l2[0])
+        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', sog_dct_l2[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is not True:
+    try:
+        sog_dct_l3 = sog_sep_l3(sog_dct_l2[0], sog_dct_l2[1])
+        print '{}:\n{}\n'.format('STEP3: SOG DEPENDENCIES', sog_dct_l3[0])
+        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', sog_dct_l3[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is not True:
+    try:
+        sog_dct_l4 = sog_sep_l4(sog_dct_l3[0], sog_dct_l3[1])
+        print '{}:\n{}\n'.format('STEP4: SOG DEPENDENCIES', sog_dct_l4[0])
+        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', sog_dct_l4[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is not True:
+    try:
+        sog_dct_l5 = sog_sep_l5(sog_dct_l4[0], sog_dct_l4[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l5[0])
+        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', sog_dct_l5[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is not True:
+    try:
+        sog_dct_l6 = sog_sep_l6(sog_dct_l5[0], sog_dct_l5[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l6[0])
+        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', sog_dct_l6[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is not True:
+    try:
+        sog_dct_l7 = sog_sep_l7(sog_dct_l6[0], sog_dct_l6[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l7[0])
+        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', sog_dct_l7[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is not True:
+    try:
+        sog_dct_l8 = sog_sep_l8(sog_dct_l7[0], sog_dct_l7[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l8[0])
+        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', sog_dct_l8[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
+
+if sog_done is True:
+    print 'ALL SOG DEPENDENCIES RESOLVED\n'
+
+
+# PROTOCOL OBJECT GROUPS
+
+
+pog_dct_all = pog_cd('sourcefile.txt')
+
+pog_dct_sep = pog_sep(pog_dct_all)
+print '{}:\n{}\n'.format('NO POG DEPENDENCIES', pog_dct_sep[0])
+print '{}:\n{}\n'.format('POG DEPENDENCIES', pog_dct_sep[1])
+
+if pog_done is not True:
+    try:
+        pog_dct_l2 = pog_sep_l2(pog_dct_sep[0], pog_dct_sep[1])
+        print '{}:\n{}\n'.format('STEP2: POG DEPENDENCIES', pog_dct_l2[0])
+        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', pog_dct_l2[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is not True:
+    try:
+        pog_dct_l3 = pog_sep_l3(pog_dct_l2[0], pog_dct_l2[1])
+        print '{}:\n{}\n'.format('STEP3: POG DEPENDENCIES', pog_dct_l3[0])
+        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', pog_dct_l3[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is not True:
+    try:
+        pog_dct_l4 = pog_sep_l4(pog_dct_l3[0], pog_dct_l3[1])
+        print '{}:\n{}\n'.format('STEP4: POG DEPENDENCIES', pog_dct_l4[0])
+        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', pog_dct_l4[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is not True:
+    try:
+        pog_dct_l5 = pog_sep_l5(pog_dct_l4[0], pog_dct_l4[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l5[0])
+        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', pog_dct_l5[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is not True:
+    try:
+        pog_dct_l6 = pog_sep_l6(pog_dct_l5[0], pog_dct_l5[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l6[0])
+        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', pog_dct_l6[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is not True:
+    try:
+        pog_dct_l7 = pog_sep_l7(pog_dct_l6[0], pog_dct_l6[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l7[0])
+        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', pog_dct_l7[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is not True:
+    try:
+        pog_dct_l8 = pog_sep_l8(pog_dct_l7[0], pog_dct_l7[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l8[0])
+        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', pog_dct_l8[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
+
+if pog_done is True:
+    print 'ALL POG DEPENDENCIES RESOLVED'
+
+
+# PRINT FUNCTIONS
+
+
+def print_acls():
+    print 'LIST OF ACLs IN CONFIGURATION:\n'
+    for item in acls_unique:
+        print item
+    print '\n'
+
+
+def print_acls_bound():
+    print 'LIST OF ACLs IN CONFIGURATION BOUND TO INTERFACES:\n'
+    for item in acls_bound:
+        print item
+    print '\n'
+
+
+def print_acls_unbound():
+    print 'LIST OF ACLs IN CONFIGUATION NOT BOUND TO INTERFACES:\n'
+    for item in acls_unbound:
+        print item
+    print '\n'
+
+
+def print_objs_unbound():
+    print 'LIST OF ORPHANED OBJECT-GROUPS IN CONFIGURATION:\n'
+    for item in objs_unbound:
+        print item
+    print '\n'
+
+
+# GENERATE OUTPUT
+
+acls = cd_acls(mycfg)
+acls_unique = cl_unique_acls(mycfg)
+# acls_bound = cl_bound_acls(mycfg)
+acls_unbound = cl_unbound_acls(mycfg)
+objs_unbound = cl_unbound_objgroups(mycfg)
+
+print_acls()
+print_acls_bound()
+print_acls_unbound()
+print_objs_unbound()
+
+print_nog_dcts()
+print_sog_dcts()
+print_pog_dcts()
+
+print 'MIGRATION CONFIGS:\n'
+
+for k, v in acls.items():
+    for item in v:
+        if k in acls_bound:
+            print item
+
