@@ -17,38 +17,38 @@ dep = dependencies
 dct = dictionaries
 
 FUNCTIONS
-cd_netobjgrps			    nog_cd			sog_cd			pog_cd
-separate_netobjgrps		    nog_sep			sog_sep			pog_sep
-separate_l2			        nog_sep_l2		sog_sep_l2		pog_sep_l2
-separate_l3			        nog_sep_l3		sog_sep_l3		pog_sep_l3
-separate_l4			        nog_sep_l4		sog_sep_l4		pog_sep_l4
-separate_l5			        nog_sep_l5		sog_sep_l5		pog_sep_l5
-separate_l6			        nog_sep_l6		sog_sep_l6		pog_sep_l6
-separate_l7			        nog_sep_l7		sog_sep_l7		pog_sep_l7
-separate_l8			        nog_sep_l8		sog_sep_l8		pog_sep_l8
+nog_cd			sog_cd			pog_cd
+nog_sep			sog_sep			pog_sep
+nog_sep_l2		sog_sep_l2		pog_sep_l2
+nog_sep_l3		sog_sep_l3		pog_sep_l3
+nog_sep_l4		sog_sep_l4		pog_sep_l4
+nog_sep_l5		sog_sep_l5		pog_sep_l5
+nog_sep_l6		sog_sep_l6		pog_sep_l6
+nog_sep_l7		sog_sep_l7		pog_sep_l7
+nog_sep_l8		sog_sep_l8		pog_sep_l8
 
 DICTIONARIES
-netobjgrps			        nog_all			sog_all			pog_all
-no_dependencies_netobjgrps	nog_dep_none	sog_dep_none	pog_dep_none
-dependencies_netobjgrps		nog_dep			sog_dep			pog_dep
-l2_dependencies_netobjgrps	nog_dep_l2		sog_dep_l2		pog_dep_l2
-l3_dependencies_netobjgrps	nog_dep_l3		sog_dep_l3		pog_dep_l3
-l4_dependencies_netobjgrps	nog_dep_l4		sog_dep_l4		pog_dep_l4
-l5_dependencies_netobjgrps	nog_dep_l5		sog_dep_l5		pog_dep_l5
-l6_dependencies_netobjgrps	nog_dep_l6		sog_dep_l6		pog_dep_l6
-l7_dependencies_netobjgrps	nog_dep_l7		sog_dep_l7		pog_dep_l7
-l8_dependencies_netobjgrps	nog_dep_l8		sog_dep_l8		pog_dep_l8
+nog_all			sog_all			pog_all
+nog_dep_none    	sog_dep_none	        pog_dep_none
+nog_dep			sog_dep			pog_dep
+nog_dep_l2		sog_dep_l2		pog_dep_l2
+nog_dep_l3		sog_dep_l3		pog_dep_l3
+nog_dep_l4		sog_dep_l4		pog_dep_l4
+nog_dep_l5		sog_dep_l5		pog_dep_l5
+nog_dep_l6		sog_dep_l6		pog_dep_l6
+nog_dep_l7		sog_dep_l7		pog_dep_l7
+nog_dep_l8		sog_dep_l8		pog_dep_l8
 
 RESULTS
-network_object_groups		nog_dct_all		sog_dct_all		pog_dct_all
-separation			        nog_dct_sep		sog_dct_sep		pog_dct_sep
-l2				            nog_dct_l2		sog_dct_l2		pog_dct_l2
-l3				            nog_dct_l3		sog_dct_l3		pog_dct_l3
-l4				            nog_dct_l4		sog_dct_l4		pog_dct_l4
-l5				            nog_dct_l5		sog_dct_l5		pog_dct_l5
-l6				            nog_dct_l6		sog_dct_l6		pog_dct_l6
-l7				            nog_dct_l7		sog_dct_l7		pog_dct_l7
-l8				            nog_dct_l8		sog_dct_l8		pog_dct_l8'''
+nog_dct_all		sog_dct_all		pog_dct_all
+nog_dct_sep		sog_dct_sep		pog_dct_sep
+nog_dct_l2		sog_dct_l2		pog_dct_l2
+nog_dct_l3		sog_dct_l3		pog_dct_l3
+nog_dct_l4		sog_dct_l4		pog_dct_l4
+nog_dct_l5		sog_dct_l5		pog_dct_l5
+nog_dct_l6		sog_dct_l6		pog_dct_l6
+nog_dct_l7		sog_dct_l7		pog_dct_l7
+nog_dct_l8		sog_dct_l8		pog_dct_l8'''
 
 # NETWORK OBJECT GROUP FUNCTIONS
 
@@ -554,42 +554,77 @@ print '{}:\n{}\n'.format('NO NOG DEPENDENCIES', nog_dct_sep[0])
 print '{}:\n{}\n'.format('NOG DEPENDENCIES', nog_dct_sep[1])
 
 if nog_done is not True:
-    nog_dct_l2 = nog_sep_l2(nog_dct_sep[0], nog_dct_sep[1])
-    print '{}:\n{}\n'.format('STEP2: NOG DEPENDENCIES', nog_dct_l2[0])
-    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', nog_dct_l2[1])
+    try:
+        nog_dct_l2 = nog_sep_l2(nog_dct_sep[0], nog_dct_sep[1])
+        print '{}:\n{}\n'.format('STEP2: NOG DEPENDENCIES', nog_dct_l2[0])
+        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', nog_dct_l2[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is not True:
-    nog_dct_l3 = nog_sep_l3(nog_dct_l2[0], nog_dct_l2[1])
-    print '{}:\n{}\n'.format('STEP3: NOG DEPENDENCIES', nog_dct_l3[0])
-    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', nog_dct_l3[1])
+    try:
+        nog_dct_l3 = nog_sep_l3(nog_dct_l2[0], nog_dct_l2[1])
+        print '{}:\n{}\n'.format('STEP3: NOG DEPENDENCIES', nog_dct_l3[0])
+        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', nog_dct_l3[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is not True:
-    nog_dct_l4 = nog_sep_l4(nog_dct_l3[0], nog_dct_l3[1])
-    print '{}:\n{}\n'.format('STEP4: NOG DEPENDENCIES', nog_dct_l4[0])
-    print '{}:\n{}\n'.format('STEP4: L4 ITEMS', nog_dct_l4[1])
+    try:
+        nog_dct_l4 = nog_sep_l4(nog_dct_l3[0], nog_dct_l3[1])
+        print '{}:\n{}\n'.format('STEP4: NOG DEPENDENCIES', nog_dct_l4[0])
+        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', nog_dct_l4[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is not True:
-    nog_dct_l5 = nog_sep_l5(nog_dct_l4[0], nog_dct_l4[1])
-    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l5[0])
-    print '{}:\n{}\n'.format('STEP5: L5 ITEMS', nog_dct_l5[1])
+    try:
+        nog_dct_l5 = nog_sep_l5(nog_dct_l4[0], nog_dct_l4[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l5[0])
+        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', nog_dct_l5[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is not True:
-    nog_dct_l6 = nog_sep_l6(nog_dct_l5[0], nog_dct_l5[1])
-    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l6[0])
-    print '{}:\n{}\n'.format('STEP5: L6 ITEMS', nog_dct_l6[1])
+    try:
+        nog_dct_l6 = nog_sep_l6(nog_dct_l5[0], nog_dct_l5[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l6[0])
+        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', nog_dct_l6[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is not True:
-    nog_dct_l7 = nog_sep_l7(nog_dct_l6[0], nog_dct_l6[1])
-    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l7[0])
-    print '{}:\n{}\n'.format('STEP5: L7 ITEMS', nog_dct_l7[1])
+    try:
+        nog_dct_l7 = nog_sep_l7(nog_dct_l6[0], nog_dct_l6[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l7[0])
+        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', nog_dct_l7[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is not True:
-    nog_dct_l8 = nog_sep_l8(nog_dct_l7[0], nog_dct_l7[1])
-    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l8[0])
-    print '{}:\n{}\n'.format('STEP5: L8 ITEMS', nog_dct_l8[1])
+    try:
+        nog_dct_l8 = nog_sep_l8(nog_dct_l7[0], nog_dct_l7[1])
+        print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l8[0])
+        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', nog_dct_l8[1])
+    except TypeError:
+        nog_done = True
+    except NameError:
+        nog_done = True
 
 if nog_done is True:
-    print 'ALL NOG DEPENDENCIES RESOLVED'
+    print 'ALL NOG DEPENDENCIES RESOLVED\n'
 
 # SERVICE OBJECT GROUP MAIN
 
@@ -600,42 +635,77 @@ print '{}:\n{}\n'.format('NO SOG DEPENDENCIES', sog_dct_sep[0])
 print '{}:\n{}\n'.format('SOG DEPENDENCIES', sog_dct_sep[1])
 
 if sog_done is not True:
-    sog_dct_l2 = sog_sep_l2(sog_dct_sep[0], sog_dct_sep[1])
-    print '{}:\n{}\n'.format('STEP2: SOG DEPENDENCIES', sog_dct_l2[0])
-    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', sog_dct_l2[1])
+    try:
+        sog_dct_l2 = sog_sep_l2(sog_dct_sep[0], sog_dct_sep[1])
+        print '{}:\n{}\n'.format('STEP2: SOG DEPENDENCIES', sog_dct_l2[0])
+        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', sog_dct_l2[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is not True:
-    sog_dct_l3 = sog_sep_l3(sog_dct_l2[0], sog_dct_l2[1])
-    print '{}:\n{}\n'.format('STEP3: SOG DEPENDENCIES', sog_dct_l3[0])
-    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', sog_dct_l3[1])
+    try:
+        sog_dct_l3 = sog_sep_l3(sog_dct_l2[0], sog_dct_l2[1])
+        print '{}:\n{}\n'.format('STEP3: SOG DEPENDENCIES', sog_dct_l3[0])
+        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', sog_dct_l3[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is not True:
-    sog_dct_l4 = sog_sep_l4(sog_dct_l3[0], sog_dct_l3[1])
-    print '{}:\n{}\n'.format('STEP4: SOG DEPENDENCIES', sog_dct_l4[0])
-    print '{}:\n{}\n'.format('STEP4: L4 ITEMS', sog_dct_l4[1])
+    try:
+        sog_dct_l4 = sog_sep_l4(sog_dct_l3[0], sog_dct_l3[1])
+        print '{}:\n{}\n'.format('STEP4: SOG DEPENDENCIES', sog_dct_l4[0])
+        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', sog_dct_l4[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is not True:
-    sog_dct_l5 = sog_sep_l5(sog_dct_l4[0], sog_dct_l4[1])
-    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l5[0])
-    print '{}:\n{}\n'.format('STEP5: L5 ITEMS', sog_dct_l5[1])
+    try:
+        sog_dct_l5 = sog_sep_l5(sog_dct_l4[0], sog_dct_l4[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l5[0])
+        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', sog_dct_l5[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is not True:
-    sog_dct_l6 = sog_sep_l6(sog_dct_l5[0], sog_dct_l5[1])
-    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l6[0])
-    print '{}:\n{}\n'.format('STEP5: L6 ITEMS', sog_dct_l6[1])
+    try:
+        sog_dct_l6 = sog_sep_l6(sog_dct_l5[0], sog_dct_l5[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l6[0])
+        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', sog_dct_l6[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is not True:
-    sog_dct_l7 = sog_sep_l7(sog_dct_l6[0], sog_dct_l6[1])
-    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l7[0])
-    print '{}:\n{}\n'.format('STEP5: L7 ITEMS', sog_dct_l7[1])
+    try:
+        sog_dct_l7 = sog_sep_l7(sog_dct_l6[0], sog_dct_l6[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l7[0])
+        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', sog_dct_l7[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is not True:
-    sog_dct_l8 = sog_sep_l8(sog_dct_l7[0], sog_dct_l7[1])
-    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l8[0])
-    print '{}:\n{}\n'.format('STEP5: L8 ITEMS', sog_dct_l8[1])
+    try:
+        sog_dct_l8 = sog_sep_l8(sog_dct_l7[0], sog_dct_l7[1])
+        print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l8[0])
+        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', sog_dct_l8[1])
+    except TypeError:
+        sog_done = True
+    except NameError:
+        sog_done = True
 
 if sog_done is True:
-    print 'ALL SOG DEPENDENCIES RESOLVED'
+    print 'ALL SOG DEPENDENCIES RESOLVED\n'
 
 # PROTOCOL OBJECT GROUP MAIN
 
@@ -646,40 +716,118 @@ print '{}:\n{}\n'.format('NO POG DEPENDENCIES', pog_dct_sep[0])
 print '{}:\n{}\n'.format('POG DEPENDENCIES', pog_dct_sep[1])
 
 if pog_done is not True:
-    pog_dct_l2 = pog_sep_l2(pog_dct_sep[0], pog_dct_sep[1])
-    print '{}:\n{}\n'.format('STEP2: POG DEPENDENCIES', pog_dct_l2[0])
-    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', pog_dct_l2[1])
+    try:
+        pog_dct_l2 = pog_sep_l2(pog_dct_sep[0], pog_dct_sep[1])
+        print '{}:\n{}\n'.format('STEP2: POG DEPENDENCIES', pog_dct_l2[0])
+        print '{}:\n{}\n'.format('STEP2: L2 ITEMS', pog_dct_l2[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is not True:
-    pog_dct_l3 = pog_sep_l3(pog_dct_l2[0], pog_dct_l2[1])
-    print '{}:\n{}\n'.format('STEP3: POG DEPENDENCIES', pog_dct_l3[0])
-    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', pog_dct_l3[1])
+    try:
+        pog_dct_l3 = pog_sep_l3(pog_dct_l2[0], pog_dct_l2[1])
+        print '{}:\n{}\n'.format('STEP3: POG DEPENDENCIES', pog_dct_l3[0])
+        print '{}:\n{}\n'.format('STEP3: L3 ITEMS', pog_dct_l3[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is not True:
-    pog_dct_l4 = pog_sep_l4(pog_dct_l3[0], pog_dct_l3[1])
-    print '{}:\n{}\n'.format('STEP4: POG DEPENDENCIES', pog_dct_l4[0])
-    print '{}:\n{}\n'.format('STEP4: L4 ITEMS', pog_dct_l4[1])
+    try:
+        pog_dct_l4 = pog_sep_l4(pog_dct_l3[0], pog_dct_l3[1])
+        print '{}:\n{}\n'.format('STEP4: POG DEPENDENCIES', pog_dct_l4[0])
+        print '{}:\n{}\n'.format('STEP4: L4 ITEMS', pog_dct_l4[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is not True:
-    pog_dct_l5 = pog_sep_l5(pog_dct_l4[0], pog_dct_l4[1])
-    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l5[0])
-    print '{}:\n{}\n'.format('STEP5: L5 ITEMS', pog_dct_l5[1])
+    try:
+        pog_dct_l5 = pog_sep_l5(pog_dct_l4[0], pog_dct_l4[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l5[0])
+        print '{}:\n{}\n'.format('STEP5: L5 ITEMS', pog_dct_l5[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is not True:
-    pog_dct_l6 = pog_sep_l6(pog_dct_l5[0], pog_dct_l5[1])
-    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l6[0])
-    print '{}:\n{}\n'.format('STEP5: L6 ITEMS', pog_dct_l6[1])
+    try:
+        pog_dct_l6 = pog_sep_l6(pog_dct_l5[0], pog_dct_l5[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l6[0])
+        print '{}:\n{}\n'.format('STEP5: L6 ITEMS', pog_dct_l6[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is not True:
-    pog_dct_l7 = pog_sep_l7(pog_dct_l6[0], pog_dct_l6[1])
-    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l7[0])
-    print '{}:\n{}\n'.format('STEP5: L7 ITEMS', pog_dct_l7[1])
+    try:
+        pog_dct_l7 = pog_sep_l7(pog_dct_l6[0], pog_dct_l6[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l7[0])
+        print '{}:\n{}\n'.format('STEP5: L7 ITEMS', pog_dct_l7[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is not True:
-    pog_dct_l8 = pog_sep_l8(pog_dct_l7[0], pog_dct_l7[1])
-    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l8[0])
-    print '{}:\n{}\n'.format('STEP5: L8 ITEMS', pog_dct_l8[1])
+    try:
+        pog_dct_l8 = pog_sep_l8(pog_dct_l7[0], pog_dct_l7[1])
+        print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l8[0])
+        print '{}:\n{}\n'.format('STEP5: L8 ITEMS', pog_dct_l8[1])
+    except TypeError:
+        pog_done = True
+    except NameError:
+        pog_done = True
 
 if pog_done is True:
     print 'ALL POG DEPENDENCIES RESOLVED'
 
+# PRINT ALL DICTIONARIES
+
+def print_nog_dcts():
+    try:
+        with open('output.txt', 'w') as f:
+            for key, value in nog_dct_sep[0].iteritems():
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l2[1].iteritems():
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l3[1].iteritems(): 
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l4[1].iteritems(): 
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l5[1].iteritems(): 
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l6[1].iteritems(): 
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l7[1].iteritems(): 
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+            for key, value in nog_dct_l8[1].iteritems(): 
+                f.write(key\n)
+                for item in value:
+                    f.write(item\n)
+    except TypeError:
+        pass
+    except NameError:
+        pass
+
+print_nog_dcts()
