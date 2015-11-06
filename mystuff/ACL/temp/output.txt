@@ -1,1 +1,19 @@
-object-group network eric  network-object 40.40.40.40 255.255.255.0object-group network DM_INLINE_NETWORK_42 network-object 12.12.12.12 255.255.255.0 network-object 13.13.13.13 255.255.255.0object-group network dan  group-object eric  network-object 30.30.30.30 255.255.255.0object-group network gr-proview-application-services  group-object dan  network-object 10.10.10.10 255.255.255.0  network-object 11.11.11.11 255.255.255.0
+object-group network eric
+  network-object 40.40.40.40 255.255.255.0
+object-group network DM_INLINE_NETWORK_42
+ network-object 12.12.12.12 255.255.255.0
+ network-object 13.13.13.13 255.255.255.0
+object-group network dan
+  group-object eric
+  network-object 30.30.30.30 255.255.255.0
+object-group network gr-proview-application-services
+  group-object dan
+  network-object 10.10.10.10 255.255.255.0
+  network-object 11.11.11.11 255.255.255.0
+object-group service dan
+  service-object tcp destination eq 80
+object-group service gr-proview-servers
+  group-object dan
+  service-object tcp destination eq 443
+object-group protocol dan
+  protocol-object tcp

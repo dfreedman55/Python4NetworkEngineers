@@ -1,12 +1,3 @@
-from collections import OrderedDict
-from ciscoconfparse import CiscoConfParse
-# from pprint import pprint
-# import re
-
-nog_done = False
-sog_done = False
-pog_done = False
-
 '''NAMING CONVENTION
 cd = create dictionary
 nog = network object group
@@ -49,6 +40,113 @@ nog_dct_l5		sog_dct_l5		pog_dct_l5
 nog_dct_l6		sog_dct_l6		pog_dct_l6
 nog_dct_l7		sog_dct_l7		pog_dct_l7
 nog_dct_l8		sog_dct_l8		pog_dct_l8'''
+
+
+# INITIALIZATION
+
+
+from collections import OrderedDict
+from ciscoconfparse import CiscoConfParse
+# from pprint import pprint
+# import re
+
+nog_done = False
+sog_done = False
+pog_done = False
+
+
+# ACL FUNCTIONS
+
+
+def ifile(fname):
+    '''
+    Ingest file and return as variable mycfg
+    '''
+    with open(fname, 'r') as f:                     
+        mycfg = f.read()
+    return mycfg
+
+
+def cl_unique_acls(mycfg):
+    '''
+    Create list of unique ACL names within the configuration
+    '''
+    unique_acls = []
+    for line in mycfg.split('\n'):
+        if 'access-list' in line:
+            if line.split(' ')[1] not in unique_acls:
+                unique_acls.append(line.split(' ')[1])
+    return unique_acls
+
+
+def cd_acls(mycfg):
+    '''
+    Create dictionary of ACLs and their respective ACL entries
+    '''
+    unique_acls = cl_unique_acls(mycfg)
+    acls = {}
+    for index, aclname in enumerate(unique_acls):
+        current_acl = []
+        for line in mycfg.strip().split('\n'):
+            if (unique_acls[index] in line) and ('access-group' not in line):
+                current_acl.append(line)
+        acls[unique_acls[index]] = current_acl
+    return acls
+
+
+def cl_bound_acls(mycfg):
+    '''
+    Create list of ACLs which are actually bound to interfaces
+    '''
+    bound_acls = []
+    for line in mycfg.split('\n'):
+        if 'access-group' in line:
+            if line.split(' ')[1] not in bound_acls:
+                bound_acls.append(line.split(' ')[1])
+    return bound_acls
+
+
+def cl_unbound_acls(mycfg):
+    '''
+    Create list of ACLs which are not actually bound to interfaces
+    '''
+    unique_acls = cl_unique_acls(mycfg)
+    bound_acls = cl_bound_acls(mycfg)
+    unbound_acls = []
+    for item in unique_acls:
+        if item in bound_acls:
+            pass
+        else:
+            unbound_acls.append(item)
+    return unbound_acls
+
+
+def cl_unbound_objgroups(mycfg):
+    '''
+    Create list of object groups which are not referenced directly by an ACL (unbound object group list) - for loop
+    Object groups referenced indirectly by other object groups (nested) are bound (remove from unbound object group list) - while loop
+    '''
+    acl_config = create_config_from_acl_dict()
+    unique_grpobjects = cl_unique_grpobjects(mycfg)
+    unique_objgroups = cl_unique_objgroups(mycfg)
+    unbound_objgroups = []
+    for item in unique_objgroups:
+        if ('object-group' in item):
+            track_type = item.split(' ')[1]
+            item = objgroup_remove_type(item)
+            if item not in acl_config:
+                item = objgroup_insert_type(item, track_type)
+                unbound_objgroups.append(item)
+    i = 0
+    while i < len(unbound_objgroups):
+        for item in unbound_objgroups:
+            if ('  group-object ' + item.split(' ')[2]) in unique_grpobjects:
+                unbound_objgroups.remove(item)
+                i += 1
+            else:
+                i = 0
+    return unbound_objgroups
+
 
 # NETWORK OBJECT GROUP FUNCTIONS
 
@@ -215,6 +313,7 @@ def nog_sep_l8(nog_dep, l7_items):
             nog_done = True
         return [nog_dep, nog_dep_l8]
 
+
 # SERVICE OBJECT GROUP FUNCTIONS
 
 
@@ -379,6 +478,7 @@ def sog_sep_l8(sog_dep, l7_items):
         if sog_dep.keys() == []:
             sog_done = True
         return [sog_dep, sog_dep_l8]
+
 
 # PROTOCOL OBJECT GROUP FUNCTIONS
 
@@ -545,7 +645,9 @@ def pog_sep_l8(pog_dep, l7_items):
             pog_done = True
         return [pog_dep, pog_dep_l8]
 
+
 # NETWORK OBJECT GROUP MAIN
+
 
 nog_dct_all = nog_cd('sourcefile.txt')
 
@@ -626,7 +728,9 @@ if nog_done is not True:
 if nog_done is True:
     print 'ALL NOG DEPENDENCIES RESOLVED\n'
 
+
 # SERVICE OBJECT GROUP MAIN
+
 
 sog_dct_all = sog_cd('sourcefile.txt')
 
@@ -707,7 +811,9 @@ if sog_done is not True:
 if sog_done is True:
     print 'ALL SOG DEPENDENCIES RESOLVED\n'
 
+
 # PROTOCOL OBJECT GROUP MAIN
+
 
 pog_dct_all = pog_cd('sourcefile.txt')
 
@@ -788,46 +894,139 @@ if pog_done is not True:
 if pog_done is True:
     print 'ALL POG DEPENDENCIES RESOLVED'
 
+
 # PRINT ALL DICTIONARIES
+
 
 def print_nog_dcts():
     try:
         with open('output.txt', 'w') as f:
             for key, value in nog_dct_sep[0].iteritems():
-                f.write(key\n)
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
+                    f.write(item + '\n')
             for key, value in nog_dct_l2[1].iteritems():
-                f.write(key\n)
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
-            for key, value in nog_dct_l3[1].iteritems(): 
-                f.write(key\n)
+                    f.write(item + '\n')
+            for key, value in nog_dct_l3[1].iteritems():
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
-            for key, value in nog_dct_l4[1].iteritems(): 
-                f.write(key\n)
+                    f.write(item + '\n')
+            for key, value in nog_dct_l4[1].iteritems():
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
-            for key, value in nog_dct_l5[1].iteritems(): 
-                f.write(key\n)
+                    f.write(item + '\n')
+            for key, value in nog_dct_l5[1].iteritems():
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
-            for key, value in nog_dct_l6[1].iteritems(): 
-                f.write(key\n)
+                    f.write(item + '\n')
+            for key, value in nog_dct_l6[1].iteritems():
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
-            for key, value in nog_dct_l7[1].iteritems(): 
-                f.write(key\n)
+                    f.write(item + '\n')
+            for key, value in nog_dct_l7[1].iteritems():
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
-            for key, value in nog_dct_l8[1].iteritems(): 
-                f.write(key\n)
+                    f.write(item + '\n')
+            for key, value in nog_dct_l8[1].iteritems():
+                f.write(key + '\n')
                 for item in value:
-                    f.write(item\n)
+                    f.write(item + '\n')
+    except TypeError:
+        pass
+    except NameError:
+        pass
+
+
+def print_sog_dcts():
+    try:
+        with open('output.txt', 'a') as f:
+            for key, value in sog_dct_sep[0].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l2[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l3[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l4[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l5[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l6[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l7[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in sog_dct_l8[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+    except TypeError:
+        pass
+    except NameError:
+        pass
+
+
+def print_pog_dcts():
+    try:
+        with open('output.txt', 'a') as f:
+            for key, value in pog_dct_sep[0].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l2[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l3[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l4[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l5[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l6[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l7[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
+            for key, value in pog_dct_l8[1].iteritems():
+                f.write(key + '\n')
+                for item in value:
+                    f.write(item + '\n')
     except TypeError:
         pass
     except NameError:
         pass
 
 print_nog_dcts()
+print_sog_dcts()
+print_pog_dcts()
+
+
+mycfg = ifile('sourcefile.txt')
+print '%s:\n%s\n' % ('UNIQUE ACLS', cl_unique_acls(mycfg))
+print '%s:\n%s\n' % ('BOUND ACLS', cl_bound_acls(mycfg))
+print '%s:\n%s\n' % ('UNBOUND ACLS', cl_unbound_acls(mycfg))
+print '%s:\n%s\n' % ('UNBOUND OBJECT GROUPS', cl_unbound_objgroups(mycfg))
