@@ -33,7 +33,7 @@
 # IMPORTS
 
 from collections import OrderedDict
-#from ciscoconfparse import CiscoConfParse
+from ciscoconfparse import CiscoConfParse
 from pprint import pprint
 import re
 
@@ -68,6 +68,33 @@ def cl_unique_objgroups(mycfg):
              unique_objgroups.append(line)
     return unique_objgroups
 
+def cl_unique_objgroups_network(mycfg):
+    '''
+    '''
+    unique_objgroups_network = []
+    for line in mycfg.split('\n'):
+        if ('object-group network' in line) and ('access-list' not in line):
+            unique_objgroups_network.append(line)
+    return unique_objgroups_network
+
+def cl_unique_objgroups_protocol(mycfg):
+    '''
+    '''
+    unique_objgroups_protocol = []
+    for line in mycfg.split('\n'):
+        if ('object-group protocol' in line) and ('access-list' not in line):
+            unique_objgroups_protocol.append(line)
+    return unique_objgroups_protocol
+
+def cl_unique_objgroups_service(mycfg):
+    '''
+    '''
+    unique_objgroups_service = []
+    for line in mycfg.split('\n'):
+        if ('object-group service' in line) and ('access-list' not in line):
+            unique_objgroups_service.append(line)
+    return unique_objgroups_service
+
 def cl_unique_grpobjects(mycfg):
     '''
     Create list of unique group-objects (nested object-groups) within the configuration
@@ -92,6 +119,51 @@ def cd_acls(mycfg):
                 current_acl.append(line)
         acls[unique_acls[index]] = current_acl
     return acls
+
+def cd_objgroups_network(mycfg):
+    '''
+    '''
+    unique_objgroups_network = cl_unique_objgroups_network(mycfg)
+    ccp_config = CiscoConfParse('sourcefile.txt')
+    objgroups_network = {}
+    for index, objname in enumerate(unique_objgroups_network):
+        lines = ccp_config.find_objects(objname)
+        current_obj = []
+        for parent_item in lines:
+            print parent_item.text
+            for child_item in parent_item.all_children:
+                print child_item.text
+#        for line in mycfg.strip().split('\n'):
+#            if (unique_objgroups_network[index] in line) and ('access-group' not in line):
+#                current_obj.append(line)
+#        objgroups_network[unique_objgroups_network[index]] = current_obj
+#    return objgroups_network
+
+def cd_objgroups_protocol(mycfg): 
+    '''               
+    ''' 
+    unique_objgroups_protocol = cl_unique_objgroups_protocol(mycfg)
+    objgroups_protocol = {}
+    for index, objname in enumerate(unique_objgroups_protocol):
+        current_obj = []
+        for line in mycfg.strip().split('\n'):
+            if (unique_objgroups_protocol[index] in line) and ('access-group' not in line):
+                current_obj.append(line)
+        objgroups_protocol[unique_objgroups_protocol[index]] = current_obj
+    return objgroups_protocol
+
+def cd_objgroups_service(mycfg): 
+    '''               
+    ''' 
+    unique_objgroups_service = cl_unique_objgroups_service(mycfg)
+    objgroups_service = {}
+    for index, objname in enumerate(unique_objgroups_service):
+        current_obj = []
+        for line in mycfg.strip().split('\n'):
+            if (unique_objgroups_service[index] in line) and ('access-group' not in line):
+                current_obj.append(line)
+        objgroups_service[unique_objgroups_service[index]] = current_obj
+    return objgroups_service
 
 def cl_bound_acls(mycfg):
     '''
@@ -205,7 +277,13 @@ print 'ACLS:'
 pprint(cd_acls(mycfg))
 print ''
 print '%s:\n%s\n' % ('UNIQUE OBJECT GROUPS', cl_unique_objgroups(mycfg))
+print '%s:\n%s\n' % ('UNIQUE OBJECT GROUPS TYPE NETWORK', cl_unique_objgroups_network(mycfg))
+print '%s:\n%s\n' % ('UNIQUE OBJECT GROUPS TYPE PROTOCOL', cl_unique_objgroups_protocol(mycfg))
+print '%s:\n%s\n' % ('UNIQUE OBJECT GROUPS TYPE SERVICE', cl_unique_objgroups_service(mycfg))
 print '%s:\n%s\n' % ('UNIQUE GROUP OBJECTS', cl_unique_grpobjects(mycfg))
+print '%s:\n%s\n' % ('DICT GROUP OBJECTS NETWORK', cd_objgroups_network(mycfg))
+#print '%s:\n%s\n' % ('DICT GROUP OBJECTS PROTOCOL', cd_objgroups_protocol(mycfg))
+#print '%s:\n%s\n' % ('DICT GROUP OBJECTS SERVICE', cd_objgroups_service(mycfg))
 print '%s:\n%s\n' % ('BOUND ACLS', cl_bound_acls(mycfg))
 print '%s:\n%s\n' % ('UNBOUND ACLS', cl_unbound_acls(mycfg))
 print '%s:\n%s\n' % ('UNBOUND OBJECT GROUPS', cl_unbound_objgroups(mycfg))
