@@ -1,12 +1,60 @@
 from collections import OrderedDict
 from ciscoconfparse import CiscoConfParse
-from pprint import pprint
-import re
+# from pprint import pprint
+# import re
 
-done = False
+nog_done = False
+sog_done = False
+pog_done = False
 
-def cd_netobjgrps(filename):
-    netobjgrps = {}
+'''NAMING CONVENTION
+cd = create dictionary
+nog = network object group
+sog = service object group
+pog = protocol object group
+sep = separate
+dep = dependencies
+dct = dictionaries
+
+FUNCTIONS
+cd_netobjgrps			    nog_cd			sog_cd			pog_cd
+separate_netobjgrps		    nog_sep			sog_sep			pog_sep
+separate_l2			        nog_sep_l2		sog_sep_l2		pog_sep_l2
+separate_l3			        nog_sep_l3		sog_sep_l3		pog_sep_l3
+separate_l4			        nog_sep_l4		sog_sep_l4		pog_sep_l4
+separate_l5			        nog_sep_l5		sog_sep_l5		pog_sep_l5
+separate_l6			        nog_sep_l6		sog_sep_l6		pog_sep_l6
+separate_l7			        nog_sep_l7		sog_sep_l7		pog_sep_l7
+separate_l8			        nog_sep_l8		sog_sep_l8		pog_sep_l8
+
+DICTIONARIES
+netobjgrps			        nog_all			sog_all			pog_all
+no_dependencies_netobjgrps	nog_dep_none	sog_dep_none	pog_dep_none
+dependencies_netobjgrps		nog_dep			sog_dep			pog_dep
+l2_dependencies_netobjgrps	nog_dep_l2		sog_dep_l2		pog_dep_l2
+l3_dependencies_netobjgrps	nog_dep_l3		sog_dep_l3		pog_dep_l3
+l4_dependencies_netobjgrps	nog_dep_l4		sog_dep_l4		pog_dep_l4
+l5_dependencies_netobjgrps	nog_dep_l5		sog_dep_l5		pog_dep_l5
+l6_dependencies_netobjgrps	nog_dep_l6		sog_dep_l6		pog_dep_l6
+l7_dependencies_netobjgrps	nog_dep_l7		sog_dep_l7		pog_dep_l7
+l8_dependencies_netobjgrps	nog_dep_l8		sog_dep_l8		pog_dep_l8
+
+RESULTS
+network_object_groups		nog_dct_all		sog_dct_all		pog_dct_all
+separation			        nog_dct_sep		sog_dct_sep		pog_dct_sep
+l2				            nog_dct_l2		sog_dct_l2		pog_dct_l2
+l3				            nog_dct_l3		sog_dct_l3		pog_dct_l3
+l4				            nog_dct_l4		sog_dct_l4		pog_dct_l4
+l5				            nog_dct_l5		sog_dct_l5		pog_dct_l5
+l6				            nog_dct_l6		sog_dct_l6		pog_dct_l6
+l7				            nog_dct_l7		sog_dct_l7		pog_dct_l7
+l8				            nog_dct_l8		sog_dct_l8		pog_dct_l8'''
+
+# NETWORK OBJECT GROUP FUNCTIONS
+
+
+def nog_cd(filename):
+    nog_all = {}
     mycfg = CiscoConfParse(filename)
     lines = mycfg.find_objects(r'^object-group network')
     if lines != []:
@@ -14,13 +62,14 @@ def cd_netobjgrps(filename):
             list_child_items = []
             for child_item in parent_item.all_children:
                 list_child_items.append(child_item.text)
-            netobjgrps[parent_item.text] = list_child_items
-        return netobjgrps
+            nog_all[parent_item.text] = list_child_items
+        return nog_all
 
-def separate_netobjgrps(netobjgrps):
-    no_dependencies_netobjgrps = OrderedDict()
-    dependencies_netobjgrps = OrderedDict()
-    for parent_item, list_child_items in netobjgrps.items():
+
+def nog_sep(nog_all):
+    nog_dep_none = OrderedDict()
+    nog_dep = OrderedDict()
+    for parent_item, list_child_items in nog_all.items():
         no_dependency = True
         count = 0
         for item in list_child_items:
@@ -28,34 +77,36 @@ def separate_netobjgrps(netobjgrps):
                 count += 1
                 no_dependency = False
                 if count == 1:
-                    dependencies_netobjgrps[parent_item] = list_child_items
+                    nog_dep[parent_item] = list_child_items
         if no_dependency:
-            no_dependencies_netobjgrps[parent_item] = list_child_items
-    return [no_dependencies_netobjgrps, dependencies_netobjgrps]
+            nog_dep_none[parent_item] = list_child_items
+    return [nog_dep_none, nog_dep]
 
-def separate_l2(no_dependencies, dependencies):
-    if dependencies.keys() != []:
-        global done
-        l2_dependencies_netobjgrps = OrderedDict()
-        for parent_item, list_child_items in dependencies.iteritems():
+
+def nog_sep_l2(nog_dep_none, nog_dep):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l2 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
             list_grpobjects = []
             for item in list_child_items:
                 if 'group-object' in item:
                     list_grpobjects.append(item)
             for item in list_grpobjects:
                 name = 'object-group network ' + item.strip().split(' ')[1]
-                if name in no_dependencies.keys():
-                    l2_dependencies_netobjgrps[parent_item] = list_child_items
-                    dependencies.pop(parent_item)
-        if dependencies.keys() == []:
-            done = True
-        return [dependencies, l2_dependencies_netobjgrps]
+                if name in nog_dep_none.keys():
+                    nog_dep_l2[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l2]
 
-def separate_l3(dependencies, l2_items):
-    if dependencies.keys() != []:
-        global done
-        l3_dependencies_netobjgrps = OrderedDict()
-        for parent_item, list_child_items in dependencies.iteritems():
+
+def nog_sep_l3(nog_dep, l2_items):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l3 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
             list_grpobjects = []
             for item in list_child_items:
                 if 'group-object' in item:
@@ -63,17 +114,18 @@ def separate_l3(dependencies, l2_items):
             for item in list_grpobjects:
                 name = 'object-group network ' + item.strip().split(' ')[1]
                 if name in l2_items.keys():
-                    l3_dependencies_netobjgrps[parent_item] = list_child_items
-                    dependencies.pop(parent_item)
-        if dependencies.keys() == []:
-            done = True
-        return [dependencies, l3_dependencies_netobjgrps]
+                    nog_dep_l3[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l3]
 
-def separate_l4(dependencies, l3_items):
-    if dependencies.keys() != []:
-        global done
-        l4_dependencies_netobjgrps = OrderedDict()
-        for parent_item, list_child_items in dependencies.iteritems():
+
+def nog_sep_l4(nog_dep, l3_items):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l4 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
             list_grpobjects = []
             for item in list_child_items:
                 if 'group-object' in item:
@@ -81,57 +133,553 @@ def separate_l4(dependencies, l3_items):
             for item in list_grpobjects:
                 name = 'object-group network ' + item.strip().split(' ')[1]
                 if name in l3_items.keys():
-                    l4_dependencies_netobjgrps[parent_item] = list_child_item
-                    dependencies.pop(parent_item)
-        if dependencies.keys() == []:
-            done = True
-        return [dependencies, l4_dependencies_netobjgrps]
+                    nog_dep_l4[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l4]
 
-def separate_l5(dependencies, l4_items):
-    if dependencies.keys() != []:
-        global done
-        l5_dependencies_netobjgrps = OrderedDict()
-        for parent_item, list_child_items in dependencies.iteritems():
+
+def nog_sep_l5(nog_dep, l4_items):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l5 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
             list_grpobjects = []
             for item in list_child_items:
-                if 'group-object' in item:              
+                if 'group-object' in item:
                     list_grpobjects.append(item)
             for item in list_grpobjects:
                 name = 'object-group network ' + item.strip().split(' ')[1]
-                if name in l4_items.keys():            
-                    l5_dependencies_netobjgrps[parent_item] = list_child_item
-                    dependencies.pop(parent_item)          
-        if dependencies.keys() == []:
-            done = True
-        return [dependencies, l5_dependencies_netobjgrps]
+                if name in l4_items.keys():
+                    nog_dep_l5[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l5]
 
-# MAIN
 
-network_object_groups = cd_netobjgrps('sourcefile.txt')
- 
-separation = separate_netobjgrps(network_object_groups)
-print '{}:\n{}\n'.format('NO DEPENDENCIES', separation[0])
-print '{}:\n{}\n'.format('DEPENDENCIES', separation[1])
+def nog_sep_l6(nog_dep, l5_items):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l6 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group network ' + item.strip().split(' ')[1]
+                if name in l5_items.keys():
+                    nog_dep_l6[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l6]
 
-if done != True:
-    l2 = separate_l2(separation[0], separation[1])
-    print '{}:\n{}\n'.format('STEP2: DEPENDENCIES', l2[0])
-    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', l2[1])
 
-if done != True:
-    l3 = separate_l3(l2[0], l2[1])
-    print '{}:\n{}\n'.format('STEP3: DEPENDENCIES', l3[0])
-    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', l3[1])
+def nog_sep_l7(nog_dep, l6_items):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l7 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group network ' + item.strip().split(' ')[1]
+                if name in l6_items.keys():
+                    nog_dep_l7[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l7]
 
-if done != True:
-    l4 = separate_l4(l3[0], l3[1])
-    print '{}:\n{}\n'.format('STEP4: DEPENDENCIES', l4[0])
-    print '{}:\n{}\n'.format('STEP4: L3 ITEMS', l4[1])
 
-if done != True:
-    l5 = separate_l5(l4[0], l4[1])
-    print '{}:\n{}\n'.format('STEP5: DEPENDENCIES', l5[0])
-    print '{}:\n{}\n'.format('STEP5: L3 ITEMS', l5[1])
+def nog_sep_l8(nog_dep, l7_items):
+    if nog_dep.keys() != []:
+        global nog_done
+        nog_dep_l8 = OrderedDict()
+        for parent_item, list_child_items in nog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group network ' + item.strip().split(' ')[1]
+                if name in l7_items.keys():
+                    nog_dep_l8[parent_item] = list_child_items
+                    nog_dep.pop(parent_item)
+        if nog_dep.keys() == []:
+            nog_done = True
+        return [nog_dep, nog_dep_l8]
 
-if done == True:
-    print 'ALL DEPENDENCIES RESOLVED'
+# SERVICE OBJECT GROUP FUNCTIONS
+
+
+def sog_cd(filename):
+    sog_all = {}
+    mycfg = CiscoConfParse(filename)
+    lines = mycfg.find_objects(r'^object-group service')
+    if lines != []:
+        for parent_item in lines:
+            list_child_items = []
+            for child_item in parent_item.all_children:
+                list_child_items.append(child_item.text)
+            sog_all[parent_item.text] = list_child_items
+        return sog_all
+
+
+def sog_sep(sog_all):
+    sog_dep_none = OrderedDict()
+    sog_dep = OrderedDict()
+    for parent_item, list_child_items in sog_all.items():
+        no_dependency = True
+        count = 0
+        for item in list_child_items:
+            if 'group-object' in item:
+                count += 1
+                no_dependency = False
+                if count == 1:
+                    sog_dep[parent_item] = list_child_items
+        if no_dependency:
+            sog_dep_none[parent_item] = list_child_items
+    return [sog_dep_none, sog_dep]
+
+
+def sog_sep_l2(sog_dep_none, sog_dep):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l2 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in sog_dep_none.keys():
+                    sog_dep_l2[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l2]
+
+
+def sog_sep_l3(sog_dep, l2_items):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l3 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in l2_items.keys():
+                    sog_dep_l3[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l3]
+
+
+def sog_sep_l4(sog_dep, l3_items):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l4 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in l3_items.keys():
+                    sog_dep_l4[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l4]
+
+
+def sog_sep_l5(sog_dep, l4_items):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l5 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in l4_items.keys():
+                    sog_dep_l5[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l5]
+
+
+def sog_sep_l6(sog_dep, l5_items):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l6 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in l5_items.keys():
+                    sog_dep_l6[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l6]
+
+
+def sog_sep_l7(sog_dep, l6_items):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l7 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in l6_items.keys():
+                    sog_dep_l7[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l7]
+
+
+def sog_sep_l8(sog_dep, l7_items):
+    if sog_dep.keys() != []:
+        global sog_done
+        sog_dep_l8 = OrderedDict()
+        for parent_item, list_child_items in sog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group service ' + item.strip().split(' ')[1]
+                if name in l7_items.keys():
+                    sog_dep_l8[parent_item] = list_child_items
+                    sog_dep.pop(parent_item)
+        if sog_dep.keys() == []:
+            sog_done = True
+        return [sog_dep, sog_dep_l8]
+
+# PROTOCOL OBJECT GROUP FUNCTIONS
+
+
+def pog_cd(filename):
+    pog_all = {}
+    mycfg = CiscoConfParse(filename)
+    lines = mycfg.find_objects(r'^object-group protocol')
+    if lines != []:
+        for parent_item in lines:
+            list_child_items = []
+            for child_item in parent_item.all_children:
+                list_child_items.append(child_item.text)
+            pog_all[parent_item.text] = list_child_items
+        return pog_all
+
+
+def pog_sep(pog_all):
+    pog_dep_none = OrderedDict()
+    pog_dep = OrderedDict()
+    for parent_item, list_child_items in pog_all.items():
+        no_dependency = True
+        count = 0
+        for item in list_child_items:
+            if 'group-object' in item:
+                count += 1
+                no_dependency = False
+                if count == 1:
+                    pog_dep[parent_item] = list_child_items
+        if no_dependency:
+            pog_dep_none[parent_item] = list_child_items
+    return [pog_dep_none, pog_dep]
+
+
+def pog_sep_l2(pog_dep_none, pog_dep):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l2 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in pog_dep_none.keys():
+                    pog_dep_l2[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l2]
+
+
+def pog_sep_l3(pog_dep, l2_items):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l3 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in l2_items.keys():
+                    pog_dep_l3[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l3]
+
+
+def pog_sep_l4(pog_dep, l3_items):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l4 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in l3_items.keys():
+                    pog_dep_l4[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l4]
+
+
+def pog_sep_l5(pog_dep, l4_items):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l5 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in l4_items.keys():
+                    pog_dep_l5[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l5]
+
+
+def pog_sep_l6(pog_dep, l5_items):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l6 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in l5_items.keys():
+                    pog_dep_l6[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l6]
+
+
+def pog_sep_l7(pog_dep, l6_items):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l7 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in l6_items.keys():
+                    pog_dep_l7[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l7]
+
+
+def pog_sep_l8(pog_dep, l7_items):
+    if pog_dep.keys() != []:
+        global pog_done
+        pog_dep_l8 = OrderedDict()
+        for parent_item, list_child_items in pog_dep.iteritems():
+            list_grpobjects = []
+            for item in list_child_items:
+                if 'group-object' in item:
+                    list_grpobjects.append(item)
+            for item in list_grpobjects:
+                name = 'object-group protocol ' + item.strip().split(' ')[1]
+                if name in l7_items.keys():
+                    pog_dep_l8[parent_item] = list_child_items
+                    pog_dep.pop(parent_item)
+        if pog_dep.keys() == []:
+            pog_done = True
+        return [pog_dep, pog_dep_l8]
+
+# NETWORK OBJECT GROUP MAIN
+
+nog_dct_all = nog_cd('sourcefile.txt')
+
+nog_dct_sep = nog_sep(nog_dct_all)
+print '{}:\n{}\n'.format('NO NOG DEPENDENCIES', nog_dct_sep[0])
+print '{}:\n{}\n'.format('NOG DEPENDENCIES', nog_dct_sep[1])
+
+if nog_done is not True:
+    nog_dct_l2 = nog_sep_l2(nog_dct_sep[0], nog_dct_sep[1])
+    print '{}:\n{}\n'.format('STEP2: NOG DEPENDENCIES', nog_dct_l2[0])
+    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', nog_dct_l2[1])
+
+if nog_done is not True:
+    nog_dct_l3 = nog_sep_l3(nog_dct_l2[0], nog_dct_l2[1])
+    print '{}:\n{}\n'.format('STEP3: NOG DEPENDENCIES', nog_dct_l3[0])
+    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', nog_dct_l3[1])
+
+if nog_done is not True:
+    nog_dct_l4 = nog_sep_l4(nog_dct_l3[0], nog_dct_l3[1])
+    print '{}:\n{}\n'.format('STEP4: NOG DEPENDENCIES', nog_dct_l4[0])
+    print '{}:\n{}\n'.format('STEP4: L4 ITEMS', nog_dct_l4[1])
+
+if nog_done is not True:
+    nog_dct_l5 = nog_sep_l5(nog_dct_l4[0], nog_dct_l4[1])
+    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l5[0])
+    print '{}:\n{}\n'.format('STEP5: L5 ITEMS', nog_dct_l5[1])
+
+if nog_done is not True:
+    nog_dct_l6 = nog_sep_l6(nog_dct_l5[0], nog_dct_l5[1])
+    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l6[0])
+    print '{}:\n{}\n'.format('STEP5: L6 ITEMS', nog_dct_l6[1])
+
+if nog_done is not True:
+    nog_dct_l7 = nog_sep_l7(nog_dct_l6[0], nog_dct_l6[1])
+    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l7[0])
+    print '{}:\n{}\n'.format('STEP5: L7 ITEMS', nog_dct_l7[1])
+
+if nog_done is not True:
+    nog_dct_l8 = nog_sep_l8(nog_dct_l7[0], nog_dct_l7[1])
+    print '{}:\n{}\n'.format('STEP5: NOG DEPENDENCIES', nog_dct_l8[0])
+    print '{}:\n{}\n'.format('STEP5: L8 ITEMS', nog_dct_l8[1])
+
+if nog_done is True:
+    print 'ALL NOG DEPENDENCIES RESOLVED'
+
+# SERVICE OBJECT GROUP MAIN
+
+sog_dct_all = sog_cd('sourcefile.txt')
+
+sog_dct_sep = sog_sep(sog_dct_all)
+print '{}:\n{}\n'.format('NO SOG DEPENDENCIES', sog_dct_sep[0])
+print '{}:\n{}\n'.format('SOG DEPENDENCIES', sog_dct_sep[1])
+
+if sog_done is not True:
+    sog_dct_l2 = sog_sep_l2(sog_dct_sep[0], sog_dct_sep[1])
+    print '{}:\n{}\n'.format('STEP2: SOG DEPENDENCIES', sog_dct_l2[0])
+    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', sog_dct_l2[1])
+
+if sog_done is not True:
+    sog_dct_l3 = sog_sep_l3(sog_dct_l2[0], sog_dct_l2[1])
+    print '{}:\n{}\n'.format('STEP3: SOG DEPENDENCIES', sog_dct_l3[0])
+    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', sog_dct_l3[1])
+
+if sog_done is not True:
+    sog_dct_l4 = sog_sep_l4(sog_dct_l3[0], sog_dct_l3[1])
+    print '{}:\n{}\n'.format('STEP4: SOG DEPENDENCIES', sog_dct_l4[0])
+    print '{}:\n{}\n'.format('STEP4: L4 ITEMS', sog_dct_l4[1])
+
+if sog_done is not True:
+    sog_dct_l5 = sog_sep_l5(sog_dct_l4[0], sog_dct_l4[1])
+    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l5[0])
+    print '{}:\n{}\n'.format('STEP5: L5 ITEMS', sog_dct_l5[1])
+
+if sog_done is not True:
+    sog_dct_l6 = sog_sep_l6(sog_dct_l5[0], sog_dct_l5[1])
+    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l6[0])
+    print '{}:\n{}\n'.format('STEP5: L6 ITEMS', sog_dct_l6[1])
+
+if sog_done is not True:
+    sog_dct_l7 = sog_sep_l7(sog_dct_l6[0], sog_dct_l6[1])
+    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l7[0])
+    print '{}:\n{}\n'.format('STEP5: L7 ITEMS', sog_dct_l7[1])
+
+if sog_done is not True:
+    sog_dct_l8 = sog_sep_l8(sog_dct_l7[0], sog_dct_l7[1])
+    print '{}:\n{}\n'.format('STEP5: SOG DEPENDENCIES', sog_dct_l8[0])
+    print '{}:\n{}\n'.format('STEP5: L8 ITEMS', sog_dct_l8[1])
+
+if sog_done is True:
+    print 'ALL SOG DEPENDENCIES RESOLVED'
+
+# PROTOCOL OBJECT GROUP MAIN
+
+pog_dct_all = pog_cd('sourcefile.txt')
+
+pog_dct_sep = pog_sep(pog_dct_all)
+print '{}:\n{}\n'.format('NO POG DEPENDENCIES', pog_dct_sep[0])
+print '{}:\n{}\n'.format('POG DEPENDENCIES', pog_dct_sep[1])
+
+if pog_done is not True:
+    pog_dct_l2 = pog_sep_l2(pog_dct_sep[0], pog_dct_sep[1])
+    print '{}:\n{}\n'.format('STEP2: POG DEPENDENCIES', pog_dct_l2[0])
+    print '{}:\n{}\n'.format('STEP2: L2 ITEMS', pog_dct_l2[1])
+
+if pog_done is not True:
+    pog_dct_l3 = pog_sep_l3(pog_dct_l2[0], pog_dct_l2[1])
+    print '{}:\n{}\n'.format('STEP3: POG DEPENDENCIES', pog_dct_l3[0])
+    print '{}:\n{}\n'.format('STEP3: L3 ITEMS', pog_dct_l3[1])
+
+if pog_done is not True:
+    pog_dct_l4 = pog_sep_l4(pog_dct_l3[0], pog_dct_l3[1])
+    print '{}:\n{}\n'.format('STEP4: POG DEPENDENCIES', pog_dct_l4[0])
+    print '{}:\n{}\n'.format('STEP4: L4 ITEMS', pog_dct_l4[1])
+
+if pog_done is not True:
+    pog_dct_l5 = pog_sep_l5(pog_dct_l4[0], pog_dct_l4[1])
+    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l5[0])
+    print '{}:\n{}\n'.format('STEP5: L5 ITEMS', pog_dct_l5[1])
+
+if pog_done is not True:
+    pog_dct_l6 = pog_sep_l6(pog_dct_l5[0], pog_dct_l5[1])
+    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l6[0])
+    print '{}:\n{}\n'.format('STEP5: L6 ITEMS', pog_dct_l6[1])
+
+if pog_done is not True:
+    pog_dct_l7 = pog_sep_l7(pog_dct_l6[0], pog_dct_l6[1])
+    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l7[0])
+    print '{}:\n{}\n'.format('STEP5: L7 ITEMS', pog_dct_l7[1])
+
+if pog_done is not True:
+    pog_dct_l8 = pog_sep_l8(pog_dct_l7[0], pog_dct_l7[1])
+    print '{}:\n{}\n'.format('STEP5: POG DEPENDENCIES', pog_dct_l8[0])
+    print '{}:\n{}\n'.format('STEP5: L8 ITEMS', pog_dct_l8[1])
+
+if pog_done is True:
+    print 'ALL POG DEPENDENCIES RESOLVED'
+
